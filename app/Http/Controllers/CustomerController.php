@@ -65,7 +65,7 @@ class CustomerController extends Controller{
             $customer['token'] = $token;
 
             $machineData = DB::table('machines')
-                            ->where('machine_id',$customer->machine_id)
+                            ->where('machine_id',$customer['machine_id'])
                             ->first();
 
 
