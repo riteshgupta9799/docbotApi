@@ -1,0 +1,19 @@
+# Netscape HTTP Cookie File
+# This is a generated file! Do not edit.
+
+.youtube.com    TRUE    /    TRUE    1768017597    LOGIN_INFO    AFmmF2swRAIgfimex56YFpfu1TTxbB37DDeJOk1LCr0m3vWxIjUSXM0CIBHWSSEfXduavTBKy9G0eB_Sju_NkaIEc4RpFZ3LoLF-:QUQ3MjNmeVQ4NWJIOW5QdnNidWVreGNu
+.youtube.com    TRUE    /    FALSE    1770374273    PREF    tz=Asia.Calcutta&f7=100
+.youtube.com    TRUE    /    FALSE    1770275584    HSID    ABtp9t8HR4CDr8f9P
+.youtube.com    TRUE    /    TRUE    1770275584    SSID    AfMKmqD44pTc2mDtg
+.youtube.com    TRUE    /    FALSE    1770275584    APISID    Z3Lvq2OZo8wvcPuI/AUc_q9x26QkCqPLo_
+.youtube.com    TRUE    /    FALSE    1770275584    SAPISID    YMF4RrV4G_-dP2K9/A2kf1j0XFrJuems05
+.youtube.com    TRUE    /    TRUE    1770275584    __Secure-1PAPISID    YMF4RrV4G_-dP2K9/A2kf1j0XFrJuems05
+.youtube.com    TRUE    /    TRUE    1770275584    __Secure-3PAPISID    YMF4RrV4G_-dP2K9/A2kf1j0XFrJuems05
+.youtube.com    TRUE    /    FALSE    1770275584    SID    g.a000rwgpMuhko4AckXGU7YlftrZPYwO1gaaU3AbVSPu2JnMOoDQYEC2xdWVhXASQw5WZUmfwbwACgYKAXsSARMSFQHGX2MiZfQzQkidPkychrcfuIaEVxoVAUF8yKpB6YT3-QKIpRf9zttzGhLM0076
+.youtube.com    TRUE    /    TRUE    1770275584    __Secure-1PSID    g.a000rwgpMuhko4AckXGU7YlftrZPYwO1gaaU3AbVSPu2JnMOoDQYes0tc8QBPamhnWXukG4P5QACgYKAUwSARMSFQHGX2MirNpZXDoj4lABNs_QsM__8xoVAUF8yKolmHdeNCJf27ip3ydAhqf20076
+.youtube.com    TRUE    /    FALSE    1770275584    __Secure-3PSID    g.a000rwgpMuhko4AckXGU7YlftrZPYwO1gaaU3AbVSPu2JnMOoDQYhO-YLHxEOBupPy_4eZZUkQACgYKAd0SARMSFQHGX2Mim6YVeCBZIZ-B_t9h34FBYhoVAUF8yKqzJnhCNF8O8wYHfqFpeuBh0076
+.youtube.com    TRUE    /    TRUE    1767350275    __Secure-1PSIDTS    sidts-CjIB7wV3sZMe9njfzbW91l3Uiy8erubrmWLb-4YojU55JtASzzTAb7uDLlDzxFcfYBTDKRAA
+.youtube.com    TRUE    /    TRUE    1767350275    __Secure-3PSIDTS    sidts-CjIB7wV3sZMe9njfzbW91l3Uiy8erubrmWLb-4YojU55JtASzzTAb7uDLlDzxFcfYBTDKRAA
+.youtube.com    TRUE    /    TRUE    1767350522    __Secure-1PSIDCC    AKEyXzWMVZfxcvNi6ITEfX7ZiDZAFAIa62WXejBA64jtv85k0sk_UqdnrLs8MmK7fl3JLhzhWA
+.youtube.com    TRUE    /    TRUE    1767350522    __Secure-3PSIDCC    AKEyXzWsB7yElf1O3KIahbgjNbgEGto5-5N9FO1W-vWF7hRP6OF8eqYA5B6AK9iMQyHiPGQfEw
+.youtube.com    TRUE    /    FALSE    1767350522    SIDCC    AKEyXzVYoVYYXX6ngaVquJ4ZFSIKfMpaNyviJhzkTsnJLDDbpffmtjiaquPf1v2bv6Owg-4llHQ
