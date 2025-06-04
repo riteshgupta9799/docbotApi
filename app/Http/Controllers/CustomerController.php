@@ -64,11 +64,16 @@ class CustomerController extends Controller{
             $customer = $user->toArray();
             $customer['token'] = $token;
 
+            $machineData = DB::table('machines')
+                            ->where('machine_id',$customer->machine_id)
+                            ->first();
+
 
             return response()->json([
                 'status' => true,
                 'message' => 'Customer Found...',
                 'customer' => $customer,
+                'machineData' => $machineData ?? null,
 
             ]);
         }
