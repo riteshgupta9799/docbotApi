@@ -18,6 +18,9 @@ use App\Http\Controllers\UserController;
 Route::get('/', function () {
     return view('welcome');
 });
+Route::get('/demo', action: function () {
+    return view('demo');
+});
 
 // echo "hello";die;
 
@@ -32,5 +35,4 @@ Route::get('/', function () {
 
 // Route::get('/home_category_with_subcategory', [UserController::class, 'home_category_with_subcategory']);
 
-Route::get('/google_login', [RegisterController::class, 'google_login']);
-Route::get('/google_login_call_back', [RegisterController::class, 'google_login_call_back']);
+

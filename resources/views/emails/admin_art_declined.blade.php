@@ -42,41 +42,6 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            Art Declined Notification
-        </div>
-        <div class="content">
-            <p>Dear <strong>{{ $admin_name }}</strong>,</p>
-            <p>We regret to inform you that the following art piece has been <span class="highlight">declined</span> by the seller.</p>
-
-            <p><strong>Art Details:</strong></p>
-            <ul>
-                <li><strong>Title:</strong> {{ $art_name }}</li>
-                <li><strong>Unique ID:</strong> {{ $art_unique_id }}</li>
-                <li><strong>Status:</strong> {{ $status }}</li>
-            </ul>
-
-            <p><strong>Artist Details:</strong></p>
-            <ul>
-                <li><strong>Name:</strong> {{ $artist_name }}</li>
-                <li><strong>Email:</strong> {{ $artist_email }}</li>
-            </ul>
-
-            <p><strong>Customer Details:</strong></p>
-            <ul>
-                <li><strong>Name:</strong> {{ $customer_name }}</li>
-                <li><strong>Email:</strong> {{ $customer_email }}</li>
-            </ul>
-
-            <p>Please take necessary action as required.</p>
-
-            <p>Best Regards,<br><strong>Your Team</strong></p>
-        </div>
-
-        <div class="footer">
-            &copy; {{ date('Y') }} MIRAMONET | All Rights Reserved
-        </div>
-    </div>
+  <h1>hi</h1>
 </body>
 </html>

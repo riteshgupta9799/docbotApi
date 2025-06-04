@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 
-class usersTableSeeder extends Seeder
+class customerTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -16,15 +16,15 @@ class usersTableSeeder extends Seeder
     public function run(): void
     {
         //
-        DB::table('users')->insert([
-            'user_id' => 1,
-            'user_unique_id' => Str::uuid(),
-            'name' => 'Ronit',
-            // 'username' => 'Ronit',
-            'email' => 'ronit@gmail.com',
+          DB::table('customers')->insert([
+            'customer_id' => 1,
+            'customer_unique_id' => Str::uuid(),
+            'name' => 'jaydip',
+            'username' => 'jaydip',
+            'email' => 'jaydip@gmail.com',
             'password' => Hash::make('Ronit@123'),
-            // 'mobile' => '1234567890',
-            // 'machine_id' => 'MACH123456',
+            'mobile' => '1234567890',
+            'machine_id' => '1',
             'inserted_date' => now()->toDateString(),
             'inserted_time' => now()->toTimeString(),
         ]);
