@@ -12,13 +12,18 @@ class AdminMiddleware
         try {
             $user = JWTAuth::parseToken()->authenticate();
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Token is invalid or missing'
-            ], 401);
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Token is invalid or missing'
+                ], 401);
+            }
+
+            // If not expecting JSON, redirect or show page
+            return response('Unauthorized', 400);
         }
 
-        if (!$user ) {
+        if (!$user) {
             return response()->json([
                 'status' => false,
                 'message' => 'Access denied. Admins only.'
@@ -28,3 +33,4 @@ class AdminMiddleware
         return $next($request);
     }
 }
+
