@@ -32,37 +32,26 @@ class AdminController extends Controller
         try {
             $query = DB::table('machines');
 
-            // Optional filtering
-            if ($request->has('search')) {
-                $search = $request->get('search');
-                $query->where(function ($q) use ($search) {
-                    $q->where('machine_unique_id', 'like', "%{$search}%")
-                        ->orWhere('bluetooth_id', 'like', "%{$search}%");
-                });
-            }
 
-            // Pagination
-            $perPage = $request->get('per_page', 15);
-            $page = $request->get('page', 1);
 
-            $total = $query->count();
-            $machines = $query->skip(($page - 1) * $perPage)
-                ->take($perPage)
-                ->orderBy('machine_id', 'desc')
-                ->get();
+        $machineUserData = $query
+            ->whereNotNull('customer_id')
+            ->orderBy('machine_id', 'desc')
+            ->get();
+
+        // Get machines where customer_id IS NULL
+        $noUserMachineData = $query
+            ->whereNull('customer_id')
+            ->orderBy('machine_id', 'desc')
+            ->get();
+
+
 
             return response()->json([
                 'status' => true,
                 'message' => 'Machines retrieved successfully',
-
-                    'machines' => $machines,
-                    'pagination' => [
-                        'current_page' => (int)$page,
-                        'per_page' => (int)$perPage,
-                        'total' => $total,
-                        'last_page' => ceil($total / $perPage)
-                    ]
-
+                    'machineUserData'=>$machineUserData,
+                    'noUserMachineData' => $noUserMachineData,
             ]);
         } catch (Exception $e) {
             return response()->json([
