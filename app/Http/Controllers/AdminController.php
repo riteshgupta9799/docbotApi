@@ -14,35 +14,61 @@ use Exception;
 class AdminController extends Controller
 {
     //
-      public function login_user(Request $request)
-{
-    $validated = $request->validate([
-        'email' => 'required|exists:users,email',
-        'password' => 'required|string',
-    ]);
+     public function login_user(Request $request)
+        {
 
-    $credentials = [
-        'email' => $validated['email'],
-        'password' => $validated['password'],
-    ];
+            $validated = $request->validate([
+                'email' => 'required|exists:users,email',
+                'password' => 'required|string',
+            ]);
 
-    if (!$token = auth('api')->attempt($credentials)) {
-        return response()->json([
-            'status' => false,
-            'message' => 'Invalid password'
-        ]);
-    }
 
-    $user = auth('api')->user(); // Now user is authenticated
-    $userData = $user->toArray();
-    $userData['token'] = $token;
+            $credentials = [
+                'email' => $validated['email'],
+                'password' => $validated['password'],
+            ];
 
-    return response()->json([
-        'status' => true,
-        'message' => 'User Found...',
-        'user' => $userData
-    ]);
-}
+            $user = auth('api')->user();
+            $user = User::where('email', $validated['email'])->first();
+            $userNew = User::where('email', $request->email)->first();
+
+
+            if (!$user) {
+
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid username'
+                ]);
+            }
+            if (!$userNew) {
+
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid username'
+                ]);
+            }
+
+            if (!$token = auth('api')->attempt($credentials)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid password'
+                ]);
+            }
+
+
+            $user->user_profile = ($user->user_profile);
+            $customer = $user->toArray();
+            $customer['token'] = $token;
+
+
+
+            return response()->json([
+                'status' => true,
+                'message' => 'User Found...',
+                'user' => $customer,
+
+            ]);
+        }
 
 
 
