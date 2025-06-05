@@ -270,64 +270,78 @@ public function get_all_customer(Request $request): JsonResponse
     }
 
     try {
-        $filter = $request->query('filter', 'all'); // default to 'all'
+        $filter = $request->query('filter', 'all');
         $threeMonthsAgo = Carbon::now()->subMonths(3);
 
-        $customersQuery = DB::table('customers');
+        // Build the main query
+        $query = DB::table('customers')
+            ->leftJoin('machines', 'customers.customer_id', '=', 'machines.customer_id')
+            ->select(
+                'customers.*',
+                DB::raw('COUNT(machines.machine_id) as machine_count'),
+                DB::raw('JSON_ARRAYAGG(
+                    CASE
+                        WHEN machines.machine_id IS NOT NULL
+                        THEN JSON_OBJECT(
+                            "machine_id", machines.machine_id,
+                            "machine_unique_id", machines.machine_unique_id,
+                            "bluetooth_id", machines.bluetooth_id
+                        )
+                        ELSE NULL
+                    END
+                ) as machines_json')
+            )
+            ->groupBy('customers.customer_id');
 
+        // Apply date filters
         if ($request->min_date) {
-            $customersQuery->where('inserted_date', '>=', $request->min_date);
+            $query->where('customers.inserted_date', '>=', $request->min_date);
         }
 
         if ($request->max_date) {
-            $customersQuery->where('inserted_date', '<=', $request->max_date);
+            $query->where('customers.inserted_date', '<=', $request->max_date);
         } else {
-            $customersQuery->where('inserted_date', '>=', $threeMonthsAgo);
+            $query->where('customers.inserted_date', '>=', $threeMonthsAgo);
         }
 
-        $customers = $customersQuery->get();
+        // Apply machine filters
+        if ($filter === 'machine_customer') {
+            $query->having('machine_count', '>', 0);
+        } elseif ($filter === 'no_machine_customer') {
+            $query->having('machine_count', '=', 0);
+        }
+
+        $customers = $query->get();
 
         if ($customers->isEmpty()) {
             return response()->json([
                 'status' => false,
-                'message' => 'No Customer Found!'
+                'message' => 'No Customer Found!',
+                'customers' => []
             ]);
         }
 
+        // Process the results
         $customerProfiles = $customers->map(function ($customer) {
-            $machines = DB::table('machines')
-                ->where('customer_id', $customer->customer_id)
-                ->select('machine_id', 'machine_unique_id', 'bluetooth_id')
-                ->get();
+            // Parse the JSON machines data
+            $machinesJson = json_decode($customer->machines_json, true);
+            $customer->machines = collect($machinesJson)
+                ->filter(function ($machine) {
+                    return $machine !== null;
+                })
+                ->values();
 
-            $customer->machines = $machines;
+            // Remove the raw JSON field
+            unset($customer->machines_json);
+
             return $customer;
         });
 
-        // Filter by customer with machines
-        // Filter by customer with machines
-if ($filter === 'machine_customer') {
-    $customerProfiles = $customerProfiles->filter(function ($c) {
-        return $c->machines->count() > 0;
-    })->values(); // Reindex
-}
-
-// Filter by customer WITHOUT machines
-if ($filter === 'no_machine_customer') {
-    $customerProfiles = $customerProfiles->filter(function ($c) {
-        return $c->machines->count() === 0;
-    })->values(); // Reindex
-}
-        if ($customerProfiles->isEmpty()) {
-    return response()->json([
-        'status' => false,
-        'message' => 'No Customer Found!',
-        'customers' => []
-    ]);
-}
-
         return response()->json([
             'status' => true,
+            'message' => 'Customers retrieved successfully',
+            'total_count' => $customerProfiles->count(),
+            'filter_applied' => $filter,
             'customers' => $customerProfiles
         ]);
 
@@ -335,7 +349,7 @@ if ($filter === 'no_machine_customer') {
         return response()->json([
             'status' => false,
             'message' => 'Error occurred while fetching customer data',
-            'error' => $e->getMessage()
+            'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
         ], 500);
     }
 }
