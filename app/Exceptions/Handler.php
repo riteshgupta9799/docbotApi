@@ -7,6 +7,7 @@ use Throwable;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Exceptions\JWTException;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class Handler extends ExceptionHandler
 {
@@ -30,17 +31,27 @@ class Handler extends ExceptionHandler
             //
         });
     }
-    public function render($request, Throwable $exception)
+
+public function render($request, Throwable $exception)
 {
-    if ($exception instanceof TokenInvalidException) {
+    // Token signature issue
+    if ($exception instanceof UnauthorizedHttpException && $exception->getMessage() === 'Token Signature could not be verified.') {
+        return response()->json([
+            'status' => false,
+            'message' => 'Token is invalid or tampered.'
+        ], 401);
+    }
+
+    // Optional: handle all other JWT exceptions too
+    if ($exception instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException) {
         return response()->json(['status' => false, 'message' => 'Token is invalid'], 401);
     }
 
-    if ($exception instanceof TokenExpiredException) {
+    if ($exception instanceof \Tymon\JWTAuth\Exceptions\TokenExpiredException) {
         return response()->json(['status' => false, 'message' => 'Token has expired'], 401);
     }
 
-    if ($exception instanceof JWTException) {
+    if ($exception instanceof \Tymon\JWTAuth\Exceptions\JWTException) {
         return response()->json(['status' => false, 'message' => 'Token not provided'], 401);
     }
 
