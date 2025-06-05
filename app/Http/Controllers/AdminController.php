@@ -112,7 +112,6 @@ class AdminController extends Controller
         try {
             // Validation
             $validator = Validator::make($request->all(), [
-                'machine_unique_id' => 'required|string|unique:machines,machine_unique_id|max:255',
                 'bluetooth_id' => 'required|string|max:255'
             ]);
 
@@ -127,8 +126,7 @@ class AdminController extends Controller
             $machineId = DB::table('machines')->insertGetId([
                 'machine_unique_id' => Str::uuid(),
                 'bluetooth_id' => $request->bluetooth_id,
-                'created_at' => now(),
-                'updated_at' => now()
+
             ]);
 
             // Get the created machine
@@ -137,13 +135,13 @@ class AdminController extends Controller
                 ->first();
 
             return response()->json([
-                'success' => true,
+                'status' => true,
                 'message' => 'Machine created successfully',
                 'data' => $machine
             ], 201);
         } catch (Exception $e) {
             return response()->json([
-                'success' => false,
+                'status' => false,
                 'message' => 'Failed to create machine',
                 'error' => $e->getMessage()
             ], 500);
