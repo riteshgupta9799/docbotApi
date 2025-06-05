@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Exception;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 
 class AdminController extends Controller
@@ -51,7 +52,7 @@ class AdminController extends Controller
                 ->get();
 
             return response()->json([
-                'success' => true,
+                'status' => true,
                 'message' => 'Machines retrieved successfully',
 
                     'machines' => $machines,
@@ -65,7 +66,7 @@ class AdminController extends Controller
             ]);
         } catch (Exception $e) {
             return response()->json([
-                'success' => false,
+                'status' => false,
                 'message' => 'Failed to retrieve machines',
                 'error' => $e->getMessage()
             ], 500);
@@ -92,7 +93,7 @@ class AdminController extends Controller
             return response()->json([
                 'status' => true,
                 'message' => 'Machine retrieved successfully',
-                'data' => $machine
+                'machines' => $machine
             ]);
         } catch (Exception $e) {
             return response()->json([
@@ -117,15 +118,14 @@ class AdminController extends Controller
 
             if ($validator->fails()) {
                 return response()->json([
-                    'success' => false,
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors()
+                    'status' => false,
+                    'message' => $validator->errors()->first()
                 ], 422);
             }
 
             // Create machine
             $machineId = DB::table('machines')->insertGetId([
-                'machine_unique_id' => $request->machine_unique_id,
+                'machine_unique_id' => Str::uuid(),
                 'bluetooth_id' => $request->bluetooth_id,
                 'created_at' => now(),
                 'updated_at' => now()
