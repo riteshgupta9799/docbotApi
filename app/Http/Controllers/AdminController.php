@@ -317,6 +317,13 @@ public function get_all_customer(Request $request): JsonResponse
                 return $c->machines->isEmpty();
             })->values();
         }
+        if ($customerProfiles->isEmpty()) {
+    return response()->json([
+        'status' => false,
+        'message' => 'No Customer Found!',
+        'customers' => []
+    ]);
+}
 
         return response()->json([
             'status' => true,
