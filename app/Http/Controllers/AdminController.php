@@ -305,18 +305,19 @@ public function get_all_customer(Request $request): JsonResponse
         });
 
         // Filter by customer with machines
-        if ($filter === 'machine_customer') {
-            $customerProfiles = $customerProfiles->filter(function ($c) {
-                return $c->machines->isNotEmpty();
-            })->values();
-        }
+        // Filter by customer with machines
+if ($filter === 'machine_customer') {
+    $customerProfiles = $customerProfiles->filter(function ($c) {
+        return $c->machines->count() > 0;
+    })->values(); // Reindex
+}
 
-        // Filter by customer WITHOUT machines
-        if ($filter === 'no_machine_customer') {
-            $customerProfiles = $customerProfiles->filter(function ($c) {
-                return $c->machines->isEmpty();
-            })->values();
-        }
+// Filter by customer WITHOUT machines
+if ($filter === 'no_machine_customer') {
+    $customerProfiles = $customerProfiles->filter(function ($c) {
+        return $c->machines->count() === 0;
+    })->values(); // Reindex
+}
         if ($customerProfiles->isEmpty()) {
     return response()->json([
         'status' => false,
