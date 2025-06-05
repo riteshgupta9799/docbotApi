@@ -10,8 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Exception;
-use Tymon\JWTAuth\Facades\JWTAuth;
-use Auth;
+use Illuminate\Support\Facades\Auth;
 
 class AdminController extends Controller
 {
@@ -21,13 +20,14 @@ class AdminController extends Controller
 
          public function getMachines(Request $request): JsonResponse
     {
-         if (!Auth::guard('api')->check()) {
+        $user = Auth::guard('api')->user();
+
+        if (!$user) {
             return response()->json([
                 'status' => false,
-                'message' => 'Unauthorized access.',
-            ]);
+                'message' => 'Unauthorized access. Token is missing or invalid.',
+            ], 401); // 401 Unauthorized
         }
-
         try {
             $query = DB::table('machines');
 
