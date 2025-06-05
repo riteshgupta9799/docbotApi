@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Exception;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class AdminController extends Controller
 {
@@ -19,55 +20,58 @@ class AdminController extends Controller
 
 
 
-    public function getMachines(Request $request): JsonResponse
-    {
-        $user = Auth::guard('api')->user();
+   public function getMachines(Request $request): JsonResponse
+{
+    $user = Auth::guard('api')->user();
 
-        if (!$user) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Unauthorized access. Token is missing or invalid.',
-            ], 401); // 401 Unauthorized
-        }
-        try {
-            $query = DB::table('machines');
-
-
-
-        $machineUserData = $query
-           ->whereNotNull('machines.customer_id')
-            ->leftjoin('customers','machines.machine_id','=','customers.machine_id')
-           ->select(
-    'machines.*',
-    'customers.name as customer_name',
-    'customers.email as customer_email'
-    // Add other fields as needed
-)
-            ->orderBy('machine_id', 'desc')
-            ->get();
-
-        // Get machines where customer_id IS NULL
-        $noUserMachineData = DB::table("machines")
-            ->whereNull('customer_id')
-            ->orderBy('machine_id', 'desc')
-            ->get();
-
-
-
-            return response()->json([
-                'status' => true,
-                'message' => 'Machines retrieved successfully',
-                    'machineUserData'=>$machineUserData,
-                    'noUserMachineData' => $noUserMachineData,
-            ]);
-        } catch (Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Failed to retrieve machines',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+    if (!$user) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Unauthorized access. Token is missing or invalid.',
+        ], 401);
     }
+
+    try {
+        $filter = $request->query('filter'); // filter=with_user / without_user / all
+
+        $machineUserData = [];
+        $noUserMachineData = [];
+
+        if (!$filter || $filter === 'with_user' || $filter === 'all') {
+            $machineUserData = DB::table('machines')
+                ->whereNotNull('machines.customer_id')
+                ->leftJoin('customers', 'machines.machine_id', '=', 'customers.machine_id')
+                ->select(
+                    'machines.*',
+                    'customers.name as customer_name',
+                    'customers.email as customer_email'
+                )
+                ->orderBy('machine_id', 'desc')
+                ->get();
+        }
+
+        if (!$filter || $filter === 'without_user' || $filter === 'all') {
+            $noUserMachineData = DB::table('machines')
+                ->whereNull('customer_id')
+                ->orderBy('machine_id', 'desc')
+                ->get();
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Machines retrieved successfully',
+            'machineUserData' => $machineUserData,
+            'noUserMachineData' => $noUserMachineData,
+        ]);
+    } catch (Exception $e) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Failed to retrieve machines',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
 
     /**
      * Get single machine
@@ -246,4 +250,85 @@ class AdminController extends Controller
             ], 500);
         }
     }
+
+
+    // user Details for Admin
+
+  public function get_all_customer(Request $request): JsonResponse
+{
+    // 1. Validate input
+    $validator = Validator::make($request->all(), [
+        'min_date' => 'nullable|date',
+        'max_date' => 'nullable|date',
+        'filter' => 'nullable|in:all,machine_customer',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'status' => false,
+            'message' => $validator->errors()->first(),
+        ], 400);
+    }
+
+    try {
+        $filter = $request->query('filter', 'all'); // default to 'all'
+        $threeMonthsAgo = Carbon::now()->subMonths(3);
+
+        // 2. Build base query
+        $customersQuery = DB::table('customers');
+
+        // 3. Apply date filters
+        if ($request->min_date) {
+            $customersQuery->where('inserted_date', '>=', $request->min_date);
+        }
+
+        if ($request->max_date) {
+            $customersQuery->where('inserted_date', '<=', $request->max_date);
+        } else {
+            $customersQuery->where('inserted_date', '>=', $threeMonthsAgo);
+        }
+
+        // 4. Get customers
+        $customers = $customersQuery->get();
+
+        if ($customers->isEmpty()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'No Customer Found!'
+            ]);
+        }
+
+        // 5. Attach machines and apply filter if needed
+        $customerProfiles = $customers->map(function ($customer) {
+            $machines = DB::table('machines')
+                ->where('customer_id', $customer->customer_id)
+                ->select('machine_id', 'machine_unique_id', 'bluetooth_id')
+                ->get();
+
+            $customer->machines = $machines;
+            return $customer;
+        });
+
+        // 6. Apply 'machine_customer' filter (only customers with machines)
+        if ($filter === 'machine_customer') {
+            $customerProfiles = $customerProfiles->filter(function ($c) {
+                return $c->machines->isNotEmpty();
+            })->values(); // reindex
+        }
+
+        // 7. Return result
+        return response()->json([
+            'status' => true,
+            'customers' => $customerProfiles
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Error occurred while fetching customer data',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
 }
