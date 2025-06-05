@@ -18,7 +18,7 @@ class AdminController extends Controller
 
 
 
-         public function getMachines(Request $request): JsonResponse
+    public function getMachines(Request $request): JsonResponse
     {
         $user = Auth::guard('api')->user();
 
@@ -34,9 +34,9 @@ class AdminController extends Controller
             // Optional filtering
             if ($request->has('search')) {
                 $search = $request->get('search');
-                $query->where(function($q) use ($search) {
+                $query->where(function ($q) use ($search) {
                     $q->where('machine_unique_id', 'like', "%{$search}%")
-                      ->orWhere('bluetooth_id', 'like', "%{$search}%");
+                        ->orWhere('bluetooth_id', 'like', "%{$search}%");
                 });
             }
 
@@ -46,14 +46,14 @@ class AdminController extends Controller
 
             $total = $query->count();
             $machines = $query->skip(($page - 1) * $perPage)
-                            ->take($perPage)
-                            ->orderBy('machine_id', 'desc')
-                            ->get();
+                ->take($perPage)
+                ->orderBy('machine_id', 'desc')
+                ->get();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Machines retrieved successfully',
-                'data' => [
+
                     'machines' => $machines,
                     'pagination' => [
                         'current_page' => (int)$page,
@@ -61,9 +61,8 @@ class AdminController extends Controller
                         'total' => $total,
                         'last_page' => ceil($total / $perPage)
                     ]
-                ]
-            ]);
 
+            ]);
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
@@ -80,22 +79,21 @@ class AdminController extends Controller
     {
         try {
             $machine = DB::table('machines')
-                        ->where('machine_id', $id)
-                        ->first();
+                ->where('machine_id', $id)
+                ->first();
 
             if (!$machine) {
                 return response()->json([
-                    'success' => false,
+                    'status' => false,
                     'message' => 'Machine not found'
                 ], 404);
             }
 
             return response()->json([
-                'success' => true,
+                'status' => true,
                 'message' => 'Machine retrieved successfully',
                 'data' => $machine
             ]);
-
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
@@ -135,15 +133,14 @@ class AdminController extends Controller
 
             // Get the created machine
             $machine = DB::table('machines')
-                        ->where('machine_id', $machineId)
-                        ->first();
+                ->where('machine_id', $machineId)
+                ->first();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Machine created successfully',
                 'data' => $machine
             ], 201);
-
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
@@ -161,8 +158,8 @@ class AdminController extends Controller
         try {
             // Check if machine exists
             $machine = DB::table('machines')
-                        ->where('machine_id', $id)
-                        ->first();
+                ->where('machine_id', $id)
+                ->first();
 
             if (!$machine) {
                 return response()->json([
@@ -203,15 +200,14 @@ class AdminController extends Controller
 
             // Get updated machine
             $updatedMachine = DB::table('machines')
-                               ->where('machine_id', $id)
-                               ->first();
+                ->where('machine_id', $id)
+                ->first();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Machine updated successfully',
                 'data' => $updatedMachine
             ]);
-
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
@@ -229,8 +225,8 @@ class AdminController extends Controller
         try {
             // Check if machine exists
             $machine = DB::table('machines')
-                        ->where('machine_id', $id)
-                        ->first();
+                ->where('machine_id', $id)
+                ->first();
 
             if (!$machine) {
                 return response()->json([
@@ -248,7 +244,6 @@ class AdminController extends Controller
                 'success' => true,
                 'message' => 'Machine deleted successfully'
             ]);
-
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
