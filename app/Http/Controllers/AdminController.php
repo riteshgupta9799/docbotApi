@@ -37,7 +37,7 @@ class AdminController extends Controller
         $machineUserData = $query
             ->whereNotNull('customer_id')
             ->leftjoin('customers','machines.customer_id','=','customers.customer_id')
-            ->select("machines.*",'customer.*')
+            ->select("machines.*",'customers.*')
             ->orderBy('machine_id', 'desc')
             ->get();
 
