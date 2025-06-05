@@ -273,38 +273,36 @@ public function get_all_customer(Request $request): JsonResponse
         $filter = $request->query('filter', 'all');
         $threeMonthsAgo = Carbon::now()->subMonths(3);
 
-        // Build the main query
         $query = DB::table('customers')
             ->leftJoin('machines', 'customers.customer_id', '=', 'machines.customer_id')
             ->select(
                 'customers.*',
                 DB::raw('COUNT(machines.machine_id) as machine_count'),
                 DB::raw('JSON_ARRAYAGG(
-                    CASE
-                        WHEN machines.machine_id IS NOT NULL
-                        THEN JSON_OBJECT(
+                    IF(machines.machine_id IS NOT NULL,
+                        JSON_OBJECT(
                             "machine_id", machines.machine_id,
                             "machine_unique_id", machines.machine_unique_id,
                             "bluetooth_id", machines.bluetooth_id
-                        )
-                        ELSE NULL
-                    END
+                        ),
+                        NULL
+                    )
                 ) as machines_json')
             )
             ->groupBy('customers.customer_id');
 
-        // Apply date filters
-        if ($request->min_date) {
+        // Date filters
+        if ($request->filled('min_date')) {
             $query->where('customers.inserted_date', '>=', $request->min_date);
         }
 
-        if ($request->max_date) {
+        if ($request->filled('max_date')) {
             $query->where('customers.inserted_date', '<=', $request->max_date);
         } else {
             $query->where('customers.inserted_date', '>=', $threeMonthsAgo);
         }
 
-        // Apply machine filters
+        // Filter logic for machine count
         if ($filter === 'machine_customer') {
             $query->having('machine_count', '>', 0);
         } elseif ($filter === 'no_machine_customer') {
@@ -317,23 +315,19 @@ public function get_all_customer(Request $request): JsonResponse
             return response()->json([
                 'status' => false,
                 'message' => 'No Customer Found!',
-                'customers' => []
+                'customers' => [],
             ]);
         }
 
-        // Process the results
+        // Process and clean results
         $customerProfiles = $customers->map(function ($customer) {
-            // Parse the JSON machines data
-            $machinesJson = json_decode($customer->machines_json, true);
+            $machinesJson = json_decode($customer->machines_json, true) ?? [];
+
             $customer->machines = collect($machinesJson)
-                ->filter(function ($machine) {
-                    return $machine !== null;
-                })
+                ->filter(fn($m) => $m !== null)
                 ->values();
 
-            // Remove the raw JSON field
             unset($customer->machines_json);
-
             return $customer;
         });
 
@@ -342,7 +336,7 @@ public function get_all_customer(Request $request): JsonResponse
             'message' => 'Customers retrieved successfully',
             'total_count' => $customerProfiles->count(),
             'filter_applied' => $filter,
-            'customers' => $customerProfiles
+            'customers' => $customerProfiles,
         ]);
 
     } catch (\Exception $e) {
@@ -353,6 +347,7 @@ public function get_all_customer(Request $request): JsonResponse
         ], 500);
     }
 }
+
 
 
 }
