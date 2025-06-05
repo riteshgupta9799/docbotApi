@@ -93,7 +93,7 @@ class CustomerController extends Controller{
                 'email' => $validated['email'],
                 'password' => $validated['password'],
             ];
-            dd($request->email);
+            // dd($request->email);
 
             $user = auth('api')->user();
             $user = User::where('email', $validated['email'])->first();
