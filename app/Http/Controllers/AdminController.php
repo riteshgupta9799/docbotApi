@@ -40,7 +40,7 @@ class AdminController extends Controller
             ->get();
 
         // Get machines where customer_id IS NULL
-        $noUserMachineData = $query
+        $noUserMachineData = DB::table("machines")
             ->whereNull('customer_id')
             ->orderBy('machine_id', 'desc')
             ->get();
