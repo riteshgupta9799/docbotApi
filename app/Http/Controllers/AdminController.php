@@ -28,7 +28,7 @@ class AdminController extends Controller
                 'password' => $validated['password'],
             ];
 
-            $user = auth('customer_api')->user();
+            $user = auth('api')->user();
             $user = User::where('email', $validated['email'])->first();
             $userNew = User::where('email', $request->email)->first();
 
