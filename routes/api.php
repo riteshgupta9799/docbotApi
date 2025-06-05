@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 Route::post('/login_customer', [CustomerController::class, 'login_customer']);
 Route::post('/login_user', [CustomerController::class, 'login_user']);
 
-Route::middleware(['jwt.auth', 'admin'])->group(function () {
+Route::prefix('admin')->middleware(['jwt.auth', 'admin'])->group(function () {
     // Get all machines
     Route::get('/machines', [AdminController::class, 'getMachines']);
 
