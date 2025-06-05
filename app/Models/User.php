@@ -15,10 +15,23 @@ class User extends Authenticatable implements JWTSubject
 
 
     protected $fillable = [
-        'user_image', 'name', 'password', 'address', 'city', 'state', 'country',
-        'inserted_date', 'inserted_time', 'email', 'role', 'mobile', 'mobile_otp',
-        'verify_mobile', 'status', 'locality', 'unique_id', 'rating', 'verify_email',
-        'gender', 'email_otp', 'valid_upto', 'permission', 'views', 'pin_code'
+        'user_id',
+        'user_unique_id',
+        'user_profile',
+        'name',
+        'email',
+        'mobile',
+        'password',
+        'country',
+        'state',
+        'city',
+        'address',
+        'zip_code',
+        'fcm_token',
+        'status',
+        'inserted_date',
+        'inserted_time',
+
     ];
 
 
