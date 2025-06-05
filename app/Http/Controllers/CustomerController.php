@@ -6,6 +6,7 @@ use Laravel\Socialite\Facades\Socialite;
 
 use Carbon\Carbon;
 use App\Models\Customer;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use GeoIp2\Database\Reader;
@@ -77,5 +78,64 @@ class CustomerController extends Controller{
 
             ]);
         }
+
+
+           public function login_user(Request $request)
+        {
+
+            $validated = $request->validate([
+                'email' => 'required|exists:users,email',
+                'password' => 'required|string',
+            ]);
+
+
+            $credentials = [
+                'email' => $validated['email'],
+                'password' => $validated['password'],
+            ];
+            dd($request->email);
+
+            $user = auth('api')->user();
+            $user = User::where('email', $validated['email'])->first();
+            $userNew = User::where('email', $request->email)->first();
+
+
+            if (!$user) {
+
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid username'
+                ]);
+            }
+            if (!$userNew) {
+
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid username'
+                ]);
+            }
+
+            if (!$token = auth('api')->attempt($credentials)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid password'
+                ]);
+            }
+
+
+            $user->user_profile = ($user->user_profile);
+            $customer = $user->toArray();
+            $customer['token'] = $token;
+
+
+
+            return response()->json([
+                'status' => true,
+                'message' => 'User Found...',
+                'user' => $customer,
+
+            ]);
+        }
+
 
 }
