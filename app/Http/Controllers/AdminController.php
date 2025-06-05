@@ -254,13 +254,12 @@ class AdminController extends Controller
 
     // user Details for Admin
 
-  public function get_all_customer(Request $request): JsonResponse
+public function get_all_customer(Request $request): JsonResponse
 {
-    // 1. Validate input
     $validator = Validator::make($request->all(), [
         'min_date' => 'nullable|date',
         'max_date' => 'nullable|date',
-        'filter' => 'nullable|in:all,machine_customer',
+        'filter' => 'nullable|in:all,machine_customer,no_machine_customer',
     ]);
 
     if ($validator->fails()) {
@@ -274,10 +273,8 @@ class AdminController extends Controller
         $filter = $request->query('filter', 'all'); // default to 'all'
         $threeMonthsAgo = Carbon::now()->subMonths(3);
 
-        // 2. Build base query
         $customersQuery = DB::table('customers');
 
-        // 3. Apply date filters
         if ($request->min_date) {
             $customersQuery->where('inserted_date', '>=', $request->min_date);
         }
@@ -288,7 +285,6 @@ class AdminController extends Controller
             $customersQuery->where('inserted_date', '>=', $threeMonthsAgo);
         }
 
-        // 4. Get customers
         $customers = $customersQuery->get();
 
         if ($customers->isEmpty()) {
@@ -298,7 +294,6 @@ class AdminController extends Controller
             ]);
         }
 
-        // 5. Attach machines and apply filter if needed
         $customerProfiles = $customers->map(function ($customer) {
             $machines = DB::table('machines')
                 ->where('customer_id', $customer->customer_id)
@@ -309,14 +304,20 @@ class AdminController extends Controller
             return $customer;
         });
 
-        // 6. Apply 'machine_customer' filter (only customers with machines)
+        // Filter by customer with machines
         if ($filter === 'machine_customer') {
             $customerProfiles = $customerProfiles->filter(function ($c) {
                 return $c->machines->isNotEmpty();
-            })->values(); // reindex
+            })->values();
         }
 
-        // 7. Return result
+        // Filter by customer WITHOUT machines
+        if ($filter === 'no_machine_customer') {
+            $customerProfiles = $customerProfiles->filter(function ($c) {
+                return $c->machines->isEmpty();
+            })->values();
+        }
+
         return response()->json([
             'status' => true,
             'customers' => $customerProfiles
@@ -330,5 +331,6 @@ class AdminController extends Controller
         ], 500);
     }
 }
+
 
 }
