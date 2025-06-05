@@ -23,4 +23,7 @@ Route::prefix('admin')->middleware(['jwt.auth', 'admin'])->group(function () {
 
     // Delete machine
     Route::delete('/machines/{id}', [AdminController::class, 'deleteMachine']);
+
+    // getallUser
+    Route::post('/get_all_customer', [AdminController::class, 'get_all_customer']);
 });
