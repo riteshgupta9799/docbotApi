@@ -285,7 +285,7 @@ class AdminController extends Controller
             $customers->where('customers.inserted_date', '<=', $request->max_date);
         }
         if($request->filter == "nomachineuser"){
-             $userData = DB::table('customers')
+             $customers = DB::table('customers')
                 ->whereNull('customers.machine_id')
                 ->leftJoin('machines', 'customers.machine_id', '=', 'machines.machine_id')
                 ->select(
@@ -295,7 +295,7 @@ class AdminController extends Controller
 
         }
         if($request->filter == "machineuser"){
-             $userData = DB::table('customers')
+             $customers = DB::table('customers')
                 ->whereNotNull('customers.machine_id')
                 ->leftJoin('machines', 'customers.machine_id', '=', 'machines.machine_id')
                 ->select(
