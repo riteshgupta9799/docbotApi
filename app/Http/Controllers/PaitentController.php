@@ -26,12 +26,7 @@ class PaitentController extends Controller
 {
     public function send_otp(Request $request)
     {
-        if (!Auth::guard('customer_api')->check()) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Unauthorized access.',
-            ], 400);
-        }
+
 
         $validator = Validator::make($request->all(), [
             "email" => 'nullable|email',
