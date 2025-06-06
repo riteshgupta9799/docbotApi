@@ -47,6 +47,10 @@ return [
             'driver' => 'jwt',
             'provider' => 'customers',
         ],
+        'paitent_api' => [
+            'driver' => 'jwt',
+            'provider' => 'paitents',
+        ],
     ],
 
 
@@ -58,6 +62,10 @@ return [
         'customers' => [
             'driver' => 'eloquent',
             'model' => App\Models\Customer::class,
+        ],
+        'paitents' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Paitents::class,
         ],
 
         // 'users' => [

@@ -27,3 +27,8 @@ Route::prefix('admin')->middleware(['jwt.auth', 'admin'])->group(function () {
     // getallUser
     Route::post('/get_all_customer', [AdminController::class, 'get_all_customer']);
 });
+
+    // paitent Send Otp
+    Route::post('/send_otp', [AdminController::class, 'send_otp']);
+    // verify Otp
+    Route::post('/verify_otp', [AdminController::class, 'verify_otp']);
