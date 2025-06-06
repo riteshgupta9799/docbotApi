@@ -313,7 +313,7 @@ class AdminController extends Controller
         }
 
 
-        $customers = $customers->orderBy('customer_id', 'desc')
+        $customers = $customers->orderBy('customers.customer_id', 'desc')
             ->get();
 
 
