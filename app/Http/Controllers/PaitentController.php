@@ -43,7 +43,7 @@ class PaitentController extends Controller
         $email = $request->email;
         $mobile = $request->mobile;
         $otp = rand(1000, 9999);
-
+        dd($email);
         if ($email) {
             $patient = DB::table('patient')
                 ->where('email', $email)
