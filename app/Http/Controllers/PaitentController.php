@@ -220,7 +220,7 @@ class PaitentController extends Controller
     }
 
     // Optional: Check if email is blocked in another table
-    $existingEmail = DB::table('customers')
+    $existingEmail = DB::table('paitent')
         ->where('paitent_email', $request->paitent_email)
         ->first();
 
