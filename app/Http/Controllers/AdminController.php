@@ -301,9 +301,7 @@ class AdminController extends Controller
                 ->select(
                     'machines.*',
                     'customers.*'
-                )
-                ->orderBy('machine_id', 'desc')
-                ->get();
+                );
         }
 
         else {
