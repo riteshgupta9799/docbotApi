@@ -116,7 +116,7 @@ class PaitentController extends Controller
         if ($email) {
             // Check in patient table
             $patient = DB::table('patient')
-                ->where('email', $email)
+                ->where('patient_email', $email)
                 ->where('email_otp', $otp)
                 ->first();
 
@@ -150,7 +150,7 @@ class PaitentController extends Controller
         if ($mobile) {
             // Check in patient table
             $patient = DB::table('patient')
-                ->where('mobile', $mobile)
+                ->where('patient_mobile', $mobile)
                 ->where('mobile_otp', $otp)
                 ->first();
 
