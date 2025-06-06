@@ -45,13 +45,13 @@ class PaitentController extends Controller
         $otp = rand(1000, 9999);
         // dd($email);
         if ($email) {
-            $patient = DB::table('patient')
-                ->where('patient_email', $email)
+            $paitent = DB::table('paitent')
+                ->where('paitent_email', $email)
                 ->first();
 
-            if ($patient) {
-                DB::table('patient')
-                    ->where('patient_email', $email)
+            if ($paitent) {
+                DB::table('paitent')
+                    ->where('paitent_email', $email)
                     ->update([
                         "email_otp" => $otp
                     ]);
@@ -69,13 +69,13 @@ class PaitentController extends Controller
         }
 
         if ($mobile) {
-            $patient = DB::table('patient')
-                ->where('patient_mobile', $mobile)
+            $paitent = DB::table('paitent')
+                ->where('paitent_mobile', $mobile)
                 ->first();
 
-            if ($patient) {
-                DB::table('patient')
-                    ->where('patient_mobile', $mobile)
+            if ($paitent) {
+                DB::table('paitent')
+                    ->where('paitent_mobile', $mobile)
                     ->update([
                         "mobile_otp" => $otp
                     ]);
@@ -114,13 +114,13 @@ class PaitentController extends Controller
         $otp = $request->otp;
 
         if ($email) {
-            // Check in patient table
-            $patient = DB::table('patient')
-                ->where('patient_email', $email)
+            // Check in paitent table
+            $paitent = DB::table('paitent')
+                ->where('paitent_email', $email)
                 ->where('email_otp', $otp)
                 ->first();
 
-            if ($patient) {
+            if ($paitent) {
                 return response()->json([
                     'status' => true,
                     'message' => 'Email OTP verified successfully.',
@@ -148,13 +148,13 @@ class PaitentController extends Controller
         }
 
         if ($mobile) {
-            // Check in patient table
-            $patient = DB::table('patient')
-                ->where('patient_mobile', $mobile)
+            // Check in paitent table
+            $paitent = DB::table('paitent')
+                ->where('paitent_mobile', $mobile)
                 ->where('mobile_otp', $otp)
                 ->first();
 
-            if ($patient) {
+            if ($paitent) {
                 return response()->json([
                     'status' => true,
                     'message' => 'Mobile OTP verified successfully.',
@@ -188,9 +188,9 @@ class PaitentController extends Controller
     {
 
         $validator = Validator::make($request->all(), [
-            'patient_name' => 'required',
-            'patient_mobile' => 'required',
-            'patient_email' => 'required|email|unique:paitent,patient_email',
+            'paitent_name' => 'required',
+            'paitent_mobile' => 'required',
+            'paitent_email' => 'required|email|unique:paitent,paitent_email',
             'gender' => 'required',
             'dob' => 'required',
             'address' => 'nullable',
@@ -212,7 +212,7 @@ class PaitentController extends Controller
 
 
         $existing = DB::table('paitent')
-                    ->where('patient_mobile',$request->patient_mobile)
+                    ->where('paitent_mobile',$request->paitent_mobile)
                     ->first();
 
                if($existing){
@@ -222,7 +222,7 @@ class PaitentController extends Controller
                 ]);
                }
         $existingEmail = DB::table('customers')
-                     ->where('patient_email',$request->patient_email)
+                     ->where('paitent_email',$request->paitent_email)
                     ->first();
 
                if($existingEmail){
@@ -235,9 +235,9 @@ class PaitentController extends Controller
 
 
         $commonData = [
-            'patient_name' => ucfirst(strtolower($request->name)),
-            'patient_email' => $request->patient_email,
-            'patient_mobile' => $request->patient_mobile,
+            'paitent_name' => ucfirst(strtolower($request->name)),
+            'paitent_email' => $request->paitent_email,
+            'paitent_mobile' => $request->paitent_mobile,
             'dob' => $request->dob,
 
             'inserted_date' => $insertDate,
@@ -249,12 +249,12 @@ class PaitentController extends Controller
 
         try {
 
-           $patientId = DB::table('paitent')->insertGetId($commonData);
-            $patient = DB::table('paitent')->where('paitent_id', $patientId)->first();
+           $paitentId = DB::table('paitent')->insertGetId($commonData);
+            $paitent = DB::table('paitent')->where('paitent_id', $paitentId)->first();
 
 
             $credentials = [
-                'email' => $request->patient_email,
+                'email' => $request->paitent_email,
             ];
 
             if (!$token = auth('paitent_api')->attempt($credentials)) {
@@ -268,7 +268,7 @@ class PaitentController extends Controller
 
             $currentDateTime = now('Asia/Kolkata');
 
-            $paitentResponse = $patient->toArray();
+            $paitentResponse = $paitent->toArray();
             $paitentResponse['token'] = $token;
 
             return response()->json([
