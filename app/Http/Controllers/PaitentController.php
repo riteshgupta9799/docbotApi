@@ -46,12 +46,12 @@ class PaitentController extends Controller
         // dd($email);
         if ($email) {
             $patient = DB::table('patient')
-                ->where('email', $email)
+                ->where('patient_email', $email)
                 ->first();
 
             if ($patient) {
                 DB::table('patient')
-                    ->where('email', $email)
+                    ->where('patient_email', $email)
                     ->update([
                         "email_otp" => $otp
                     ]);
@@ -70,12 +70,12 @@ class PaitentController extends Controller
 
         if ($mobile) {
             $patient = DB::table('patient')
-                ->where('mobile', $mobile)
+                ->where('patient_mobile', $mobile)
                 ->first();
 
             if ($patient) {
                 DB::table('patient')
-                    ->where('mobile', $mobile)
+                    ->where('patient_mobile', $mobile)
                     ->update([
                         "mobile_otp" => $otp
                     ]);
