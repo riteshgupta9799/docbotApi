@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Customer;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -36,6 +37,8 @@ class AdminController extends Controller
 
         $machineUserData = [];
         $noUserMachineData = [];
+
+
 
         if (!$filter || $filter === 'with_user' || $filter === 'all') {
             $machineUserData = DB::table('machines')
@@ -254,99 +257,233 @@ class AdminController extends Controller
 
     // user Details for Admin
 
-public function get_all_customer(Request $request): JsonResponse
-{
-    $validator = Validator::make($request->all(), [
-        'min_date' => 'nullable|date',
-        'max_date' => 'nullable|date',
-        'filter' => 'nullable|in:all,machine_customer,no_machine_customer',
-    ]);
+ public function get_all_customer(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'min_date' => 'nullable|date',
+            'max_date' => 'nullable|date',
+            'filter' => 'nullable|in:all,machineUser,nomachineuser',
 
-    if ($validator->fails()) {
-        return response()->json([
-            'status' => false,
-            'message' => $validator->errors()->first(),
-        ], 400);
-    }
+        ]);
 
-    try {
-        $filter = $request->query('filter', 'all');
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()->first(),
+            ], 400);
+        }
+
+
         $threeMonthsAgo = Carbon::now()->subMonths(3);
+        $customers = DB::table('customers');
 
-        $query = DB::table('customers')
-            ->leftJoin('machines', 'customers.customer_id', '=', 'machines.customer_id')
-            ->select(
-                'customers.*',
-                DB::raw('COUNT(machines.machine_id) as machine_count'),
-                DB::raw('JSON_ARRAYAGG(
-                    IF(machines.machine_id IS NOT NULL,
-                        JSON_OBJECT(
-                            "machine_id", machines.machine_id,
-                            "machine_unique_id", machines.machine_unique_id,
-                            "bluetooth_id", machines.bluetooth_id
-                        ),
-                        NULL
-                    )
-                ) as machines_json')
-            )
-            ->groupBy('customers.customer_id');
-
-        // Date filters
-        if ($request->filled('min_date')) {
-            $query->where('customers.inserted_date', '>=', $request->min_date);
+        if ($request->min_date) {
+            $customers->where('customers.inserted_date', '>=', $request->min_date);
         }
 
-        if ($request->filled('max_date')) {
-            $query->where('customers.inserted_date', '<=', $request->max_date);
-        } else {
-            $query->where('customers.inserted_date', '>=', $threeMonthsAgo);
+        if ($request->max_date) {
+            $customers->where('customers.inserted_date', '<=', $request->max_date);
+        }
+        if($request->filter == "nomachineuser"){
+             $userData = DB::table('customers')
+                ->whereNull('customers.machine_id')
+                ->leftJoin('machines', 'customers.machine_id', '=', 'machines.machine_id')
+                ->select(
+                    'machines.*',
+                    'customers.*'
+                );
+
+        }
+        if($request->filter == "machineuser"){
+             $userData = DB::table('customers')
+                ->whereNotNull('customers.machine_id')
+                ->leftJoin('machines', 'customers.machine_id', '=', 'machines.machine_id')
+                ->select(
+                    'machines.*',
+                    'customers.*'
+                )
+                ->orderBy('machine_id', 'desc')
+                ->get();
         }
 
-        // Filter logic for machine count
-        if ($filter === 'machine_customer') {
-            $query->having('machine_count', '>', 0);
-        } elseif ($filter === 'no_machine_customer') {
-            $query->having('machine_count', '=', 0);
+        else {
+
+            $customers = $customers->where('inserted_date', '>=', $threeMonthsAgo);
         }
 
-        $customers = $query->get();
+
+        $customers = $customers->orderBy('customer_id', 'desc')
+            ->get();
+
+        $customerProfiles = null;
+
+        foreach ($customers as $customer) {
+
+            $artCount = 0;
+            if ($customer->role === 'seller') {
+                $artCount = $customer->art->count();
+                $art = DB::table('ordered_arts')->where('seller_id', $customer->customer_id)->where('art_order_status', 'Delivered')->orderBy('ordered_art_id', 'desc')->get();
+                $total_ammount = 0;
+                $total = 0;
+                $total_deductions = 0;
+                $result = [];
+                foreach ($art as $value) {
+                    $trans = DB::table('ordered_arts')
+                        ->where('ordered_art_id', $value->ordered_art_id)
+                        ->join('art', 'ordered_arts.art_id', '=', 'art.art_id')
+                        ->join('art_images', 'art.art_id', '=', 'art_images.art_id')
+                        ->select('ordered_arts.*', 'art.title', 'art.portal_percentages', 'art_images.image', 'art.art_unique_id')
+                        ->first();
+
+                    // dd($trans->portal_percentages);
+                    if ($value->art_order_status == 'Delivered') {
+                        $portal_percentage = str_replace('%', '', $trans->portal_percentages);
+                        $portal_percentage = floatval($portal_percentage) / 100;
+
+                        $deduction = $value->price * $portal_percentage;
+                        $total_deductions = $deduction;
+                        $total += $value->price - $deduction;
+                        $portal_percentage = str_replace('%', '', $trans->portal_percentages);
+                    }
+
+                    $transaction = [
+                        'ordered_art_id' => $trans->ordered_art_id,
+                        'art_id' => $trans->art_id,
+                        'art_unique_id' => $trans->art_unique_id,
+                        'art_name' => $trans->title,
+                        'image' => isset($trans->image) ? url($trans->image) : null,
+                        'price' => $value->price,
+                        'art' => $trans->title,
+                        'art_order_status' => $trans->art_order_status,
+                        'portal_percentages' => $trans->portal_percentages,
+                        'date' => $trans->inserted_date,
+                        'time' => $trans->inserted_time,
+                        'platefarm_deduction' => $total_deductions,
+                        'total_after_deducted' => $value->price - $total_deductions,
+                    ];
+
+                    $total_ammount += $value->price - $total_deductions;
+
+                    array_push($result, $transaction);
+                }
+                $withdraw = DB::table('wallet_widthraw_request')
+                    ->where('seller_id', $customer->customer_id)
+                    ->where('status', 'Approved')
+                    ->sum(column: 'amount');
+            }
+
+            $country = DB::table('customers')
+                ->leftJoin('countries', 'customers.country', '=', 'countries.country_id')
+                ->where('customers.customer_id', $customer->customer_id)
+                ->first();
+
+            $state = DB::table('customers')
+                ->leftJoin('states', 'customers.state', '=', 'states.state_subdivision_id')
+                ->where('customers.customer_id', $customer->customer_id)
+                ->first();
+
+            $city = DB::table('customers')
+                ->leftJoin('cities', 'customers.city', '=', 'cities.cities_id')
+                ->where('customers.customer_id', $customer->customer_id)
+                ->first();;
+            $customerProfile = [
+                'customer_unique_id' => $customer->customer_unique_id ?? null,
+                'name' => $customer->name ?? null,
+                'email' => $customer->email ?? null,
+                'role' => $customer->role ?? null,
+                'status' => $customer->status ?? null,
+                'country' => $country ? [
+                    'country_id' => $country->country_id ?? null,
+                    'country_name' => $country->country_name ?? null
+                ] : [],
+                'state' => $state ? [
+                    'state_id' => $state->state_subdivision_id ?? null,
+                    'state_name' => $state->state_subdivision_name ?? null
+                ] : [],
+                'city' => $city ? [
+                    'city_id' => $city->cities_id ?? null,
+                    'city_name' => $city->name_of_city ?? null
+                ] : [],
+                'customer_addres' => $customer->address ?? null,
+                'customer_bio' => $customer->introduction ?? null,
+                'customer_mobile' => $customer->mobile ?? null,
+                'customer_profile' => isset($customer->customer_profile) ? url($customer->customer_profile) : null,
+                'artCount' => $artCount,
+                'total_ammount' => $total_ammount ?? 0,
+                'withdraw' => $withdraw ?? 0,
+                'art' => ($customer->art && $customer->art->isNotEmpty()) ? $customer->art->map(function ($art) {
+                    $colorCode = DB::table('status_color')
+                        ->where('status_name', $art->status)
+                        ->select('status_color_code')
+                        ->first();
+                    return [
+                        'colorCode' => $colorCode->status_color_code ?? null,
+                        'art_unique_id' => $art->art_unique_id ?? null,
+                        'title' => $art->title ?? null,
+                        'paragraph' => $art->paragraph ?? null,
+                        'artist_name' => $art->artist_name ?? null,
+                        'category' => $art->category ? [
+                            'category_name' => $art->category->category_name ?? null,
+                            'category_icon' => isset($art->category->category_icon) ? url($art->category->category_icon) : null,
+                            'category_image' => isset($art->category->category_image) ? $art->category->category_image : null,
+                            'sub_text' => $art->category->sub_text ?? null,
+                        ] : null,
+                        'price' => $art->price ?? $art->estimate_price_from . ' - ' . $art->estimate_price_to,
+                        'edition' => $art->edition ?? null,
+                        'since' => $art->since ?? null,
+                        'pickup_address' => $art->pickup_address ?? null,
+                        'pincode' => $art->pincode ?? null,
+                        'status' => $art->status ?? null,
+                        'country' => $art->country ? [
+                            'country_id' => $art->countries->country_id ?? null,
+                            'country_name' => $art->countries->country_name ?? null
+                        ] : null,
+                        'state' => $art->state ? [
+                            'state_id' => $art->states->state_subdivision_id ?? null,
+                            'state_name' => $art->states->state_subdivision_name ?? null
+                        ] : null,
+                        'city' => $art->city ? [
+                            'city_id' => $art->cities->cities_id ?? null,
+                            'city_name' => $art->cities->name_of_city ?? null
+                        ] : null,
+                        'art_images' => $art->artImages && $art->artImages->isNotEmpty() ? $art->artImages->map(function ($image) {
+                            return [
+                                'image_id' => $image->art_image_id ?? null,
+                                'image_url' => isset($image->image) ? url($image->image) : null,
+                            ];
+                        }) : [],
+                        'art_additional_details' => $art->artAdditionalDetails && $art->artAdditionalDetails->isNotEmpty() ? $art->artAdditionalDetails->map(function ($detail) {
+                            return [
+                                'description' => $detail->description ?? null,
+                                'art_data_title' => $detail->artData ? $detail->artData->art_data_title : null
+                            ];
+                        }) : []
+                    ];
+                }) : [],
+            ];
+
+            if (array_filter($customerProfile)) {
+                $customerProfiles[] = $customerProfile;
+            }
+        }
+
+
+
+
+
+
 
         if ($customers->isEmpty()) {
             return response()->json([
                 'status' => false,
-                'message' => 'No Customer Found!',
-                'customers' => [],
+                'message' => 'No Customer Found!'
             ]);
         }
-
-        // Process and clean results
-        $customerProfiles = $customers->map(function ($customer) {
-            $machinesJson = json_decode($customer->machines_json, true) ?? [];
-
-            $customer->machines = collect($machinesJson)
-                ->filter(fn($m) => $m !== null)
-                ->values();
-
-            unset($customer->machines_json);
-            return $customer;
-        });
-
         return response()->json([
             'status' => true,
-            'message' => 'Customers retrieved successfully',
-            'total_count' => $customerProfiles->count(),
-            'filter_applied' => $filter,
-            'customers' => $customerProfiles,
+            'customers' => $customerProfiles
         ]);
-
-    } catch (\Exception $e) {
-        return response()->json([
-            'status' => false,
-            'message' => 'Error occurred while fetching customer data',
-            'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
-        ], 500);
     }
-}
 
 
 
