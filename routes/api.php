@@ -31,5 +31,9 @@ Route::prefix('admin')->middleware(['jwt.auth', 'admin'])->group(function () {
 
     // paitent Send Otp
     Route::post('/send_otp', [PaitentController::class, 'send_otp']);
+
     // verify Otp
     Route::post('/verify_otp', [PaitentController::class, 'verify_otp']);
+
+       // register_paitent
+    Route::post('/register_paitent', [PaitentController::class, 'register_paitent']);

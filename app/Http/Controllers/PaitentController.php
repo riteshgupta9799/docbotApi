@@ -184,4 +184,107 @@ class PaitentController extends Controller
             'message' => 'Invalid OTP or no matching record found.',
         ], 400);
     }
+     public function register_paitent(Request $request)
+    {
+
+        $validator = Validator::make($request->all(), [
+            'patient_name' => 'required',
+            'patient_mobile' => 'required',
+            'patient_email' => 'required|email|unique:paitent,patient_email',
+            'gender' => 'required',
+            'dob' => 'required',
+            'address' => 'nullable',
+        ]);
+
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()->first(),
+            ], 400);
+        }
+
+            $currentDateTime = Carbon::now('Asia/Kolkata');
+            $insertDate = $currentDateTime->toDateString();
+            $insertTime = $currentDateTime->toTimeString();
+
+        // Add 14 days to the current date
+
+
+        $existing = DB::table('paitent')
+                    ->where('patient_mobile',$request->patient_mobile)
+                    ->first();
+
+               if($existing){
+                return response()->josn([
+                    'status'=>false,
+                    'message'=>'Mobile Number Alredy Exists'
+                ]);
+               }
+        $existingEmail = DB::table('customers')
+                     ->where('patient_email',$request->patient_email)
+                    ->first();
+
+               if($existingEmail){
+                return response()->josn([
+                    'status'=>false,
+                    'message' => 'This email is restricted from creating an account.'
+                ]);
+               }
+        $currentDateTime = Carbon::now('Asia/Kolkata');
+
+
+        $commonData = [
+            'patient_name' => ucfirst(strtolower($request->name)),
+            'patient_email' => $request->patient_email,
+            'patient_mobile' => $request->patient_mobile,
+            'dob' => $request->dob,
+
+            'inserted_date' => $insertDate,
+
+            'inserted_time' => $insertTime,
+
+            'address'=>$request->address
+        ];
+
+        try {
+
+           $patientId = DB::table('paitent')->insertGetId($commonData);
+            $patient = DB::table('paitent')->where('paitent_id', $patientId)->first();
+
+
+            $credentials = [
+                'email' => $request->patient_email,
+            ];
+
+            if (!$token = auth('paitent_api')->attempt($credentials)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid credentials',
+                ], 200);
+            }
+
+
+
+            $currentDateTime = now('Asia/Kolkata');
+
+            $paitentResponse = $patient->toArray();
+            $paitentResponse['token'] = $token;
+
+            return response()->json([
+                'status' => true,
+
+                'message' => 'Customer Registered Successfully',
+                'paitent' => $paitentResponse,
+            ]);
+        } catch (\Exception $e) {
+
+
+
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred during registration: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
 }
