@@ -250,7 +250,7 @@ class PaitentController extends Controller
 
         // Generate auth token (requires password-based auth; adjust if you're not storing passwords)
         $credentials = [
-            'email' => $request->paitent_email,
+            'paitent_email' => $request->paitent_email,
             // 'password' => $request->password, // Uncomment and use if password is stored
         ];
 
