@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\PaitentController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\CustomerController;
 use Illuminate\Support\Facades\Route;
@@ -29,6 +30,6 @@ Route::prefix('admin')->middleware(['jwt.auth', 'admin'])->group(function () {
 });
 
     // paitent Send Otp
-    Route::post('/send_otp', [AdminController::class, 'send_otp']);
+    Route::post('/send_otp', [PaitentController::class, 'send_otp']);
     // verify Otp
-    Route::post('/verify_otp', [AdminController::class, 'verify_otp']);
+    Route::post('/verify_otp', [PaitentController::class, 'verify_otp']);
