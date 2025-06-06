@@ -56,10 +56,15 @@ class PaitentController extends Controller
                         "email_otp" => $otp
                     ]);
             } else {
-                DB::table('open_otp')->updateOrInsert(
-                    ['email' => $email],
-                    ['otp' => $otp]
-                );
+                // DB::table('open_otp')->updateOrInsert(
+                //     ['email' => $email],
+                //     ['otp' => $otp]
+                // );
+
+                DB::table('open_otp')->insert([
+                    'email'=>$email,
+                    'otp'=>$otp,
+                ]);
             }
         }
 
