@@ -311,7 +311,7 @@ class AdminController extends Controller
 
             $customers = $customers->where('inserted_date', '>=', $threeMonthsAgo)
             ->leftJoin('machines', 'customers.machine_id', '=', 'machines.machine_id')
-            ->slect('machines.*','customers.*');
+            ->select('machines.*','customers.*');
         }
 
 
