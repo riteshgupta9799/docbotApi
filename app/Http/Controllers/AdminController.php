@@ -15,6 +15,8 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
+use Tymon\JWTAuth\Facades\JWTAuth;
+
 
 
 class AdminController extends Controller
@@ -367,29 +369,20 @@ class AdminController extends Controller
         ];
          try {
             $customerId = DB::table('customers')->insertGetId($commonData);
-            $customer = DB::table('customers')->where('customer_id', $customerId)->first();
+            // $customer = DB::table('customers')->where('customer_id', $customerId)->first();
 
-            // Generate auth token (requires password-based auth; adjust if you're not storing passwords)
-            $credentials = [
-                'email' => $customer->email,
-                'password' => $request->password, // Uncomment and use if password is stored
-            ];
+           // Retrieve Eloquent model for token generation
+        $customerModel = \App\Models\Customer::find($customerId);
+
+        // Generate token
+        $token = JWTAuth::fromUser($customerModel);
 
 
-            if (!$token = auth('customer_api')->attempt($credentials)) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Invalid credentials',
-                ], 401);
-            }
-
-              $customerResponse = $customer->toArray();
-            $customerResponse['token'] = $token;
            return response()->json([
                 'status' => true,
                 // 'role' => $customer->role,
                 'message' => 'Customer Registered Successfully',
-                'customer' => $customerResponse,
+               'customer' => array_merge($customerModel->toArray(), ['token' => $token]),
             ]);
         } catch (\Exception $e) {
             return response()->json([
