@@ -65,7 +65,7 @@ return [
         ],
         'paitents' => [
             'driver' => 'eloquent',
-            'model' => App\Models\Paitent::class,
+            'model' => App\Models\Paitents::class,
         ],
 
         // 'users' => [
