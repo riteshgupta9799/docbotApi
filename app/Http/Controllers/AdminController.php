@@ -372,12 +372,17 @@ public function get_all_customer(Request $request)
         $customers->where('customers.inserted_date', '<=', $request->max_date);
     }
 
+        $threeMonthsAgo = Carbon::now()->subMonths(3);
+
     // Filter logic
     if ($request->filter === 'machineuser') {
         $customers->whereNotNull('customers.machine_id');
     } elseif ($request->filter === 'nomachineuser') {
         $customers->whereNull('customers.machine_id');
     }
+     else {
+            $customers = $customers->where('inserted_date', '>=', $threeMonthsAgo);
+         }
 
     // Sort
     $customers = $customers->orderBy('customers.customer_id', 'desc')->get();
