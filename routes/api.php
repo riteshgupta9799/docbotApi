@@ -27,6 +27,9 @@ Route::prefix('admin')->middleware(['jwt.auth', 'admin'])->group(function () {
 
     // getallUser
     Route::post('/get_all_customer', [AdminController::class, 'get_all_customer']);
+
+    // addUser
+    Route::post('/register_customer', [AdminController::class, 'register_customer']);
 });
 
     // paitent Send Otp
@@ -37,3 +40,5 @@ Route::prefix('admin')->middleware(['jwt.auth', 'admin'])->group(function () {
 
        // register_paitent
     Route::post('/register_paitent', [PaitentController::class, 'register_paitent']);
+
+       // register_paitent

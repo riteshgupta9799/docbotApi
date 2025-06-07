@@ -14,6 +14,8 @@ use Exception;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Hash;
+
 
 class AdminController extends Controller
 {
@@ -21,59 +23,59 @@ class AdminController extends Controller
 
 
 
-   public function getMachines(Request $request): JsonResponse
-{
-    $user = Auth::guard('api')->user();
+    public function getMachines(Request $request): JsonResponse
+    {
+        $user = Auth::guard('api')->user();
 
-    if (!$user) {
-        return response()->json([
-            'status' => false,
-            'message' => 'Unauthorized access. Token is missing or invalid.',
-        ], 401);
-    }
-
-    try {
-        $filter = $request->query('filter'); // filter=with_user / without_user / all
-
-        $machineUserData = [];
-        $noUserMachineData = [];
-
-
-
-        if (!$filter || $filter === 'with_user' || $filter === 'all') {
-            $machineUserData = DB::table('machines')
-                ->whereNotNull('machines.customer_id')
-                ->leftJoin('customers', 'machines.machine_id', '=', 'customers.machine_id')
-                ->select(
-                    'machines.*',
-                    'customers.name as customer_name',
-                    'customers.email as customer_email'
-                )
-                ->orderBy('machine_id', 'desc')
-                ->get();
+        if (!$user) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Unauthorized access. Token is missing or invalid.',
+            ], 401);
         }
 
-        if (!$filter || $filter === 'without_user' || $filter === 'all') {
-            $noUserMachineData = DB::table('machines')
-                ->whereNull('customer_id')
-                ->orderBy('machine_id', 'desc')
-                ->get();
-        }
+        try {
+            $filter = $request->query('filter'); // filter=with_user / without_user / all
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Machines retrieved successfully',
-            'machineUserData' => $machineUserData,
-            'noUserMachineData' => $noUserMachineData,
-        ]);
-    } catch (Exception $e) {
-        return response()->json([
-            'status' => false,
-            'message' => 'Failed to retrieve machines',
-            'error' => $e->getMessage()
-        ], 500);
+            $machineUserData = [];
+            $noUserMachineData = [];
+
+
+
+            if (!$filter || $filter === 'with_user' || $filter === 'all') {
+                $machineUserData = DB::table('machines')
+                    ->whereNotNull('machines.customer_id')
+                    ->leftJoin('customers', 'machines.machine_id', '=', 'customers.machine_id')
+                    ->select(
+                        'machines.*',
+                        'customers.name as customer_name',
+                        'customers.email as customer_email'
+                    )
+                    ->orderBy('machine_id', 'desc')
+                    ->get();
+            }
+
+            if (!$filter || $filter === 'without_user' || $filter === 'all') {
+                $noUserMachineData = DB::table('machines')
+                    ->whereNull('customer_id')
+                    ->orderBy('machine_id', 'desc')
+                    ->get();
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Machines retrieved successfully',
+                'machineUserData' => $machineUserData,
+                'noUserMachineData' => $noUserMachineData,
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to retrieve machines',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
-}
 
 
     /**
@@ -257,150 +259,145 @@ class AdminController extends Controller
 
     // user Details for Admin
 
-//  public function get_all_customer(Request $request)
-//     {
-//         $validator = Validator::make($request->all(), [
-//             'min_date' => 'nullable|date',
-//             'max_date' => 'nullable|date',
-//             'filter' => 'nullable|in:all,machineUser,nomachineuser',
+    public function get_all_customer(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'min_date' => 'nullable|date',
+            'max_date' => 'nullable|date',
+            'filter' => 'nullable|in:all,machineuser,nomachineuser',
+        ]);
 
-//         ]);
-
-//         if ($validator->fails()) {
-//             return response()->json([
-//                 'status' => false,
-//                 'message' => $validator->errors()->first(),
-//             ], 400);
-//         }
-
-
-//         $threeMonthsAgo = Carbon::now()->subMonths(3);
-//         $customers = DB::table('customers');
-
-//         if ($request->min_date) {
-//             $customers->where('customers.inserted_date', '>=', $request->min_date);
-//         }
-
-//         if ($request->max_date) {
-//             $customers->where('customers.inserted_date', '<=', $request->max_date);
-//         }
-//         if($request->filter == "nomachineuser"){
-//              $customers = DB::table('customers')
-//                 ->whereNull('customers.machine_id')
-//                 ->leftJoin('machines', 'customers.machine_id', '=', 'machines.machine_id')
-//                 ->select(
-//                     'machines.*',
-//                     'customers.*'
-//                 );
-
-//         }
-//         if($request->filter == "machineuser"){
-//              $customers = DB::table('customers')
-//                 ->whereNotNull('customers.machine_id')
-//                 ->leftJoin('machines', 'customers.machine_id', '=', 'machines.machine_id')
-//                 ->select(
-//                     'machines.*',
-//                     'customers.*'
-//                 );
-//         }
-
-//         else {
-
-
-//             $customers = $customers->where('inserted_date', '>=', $threeMonthsAgo)
-//             ->leftJoin('machines', 'customers.machine_id', '=', 'machines.machine_id')
-//             ->select('machines.*','customers.*');
-//         }
-
-
-//         $customers = $customers->orderBy('customers.customer_id', 'desc')
-//             ->get();
-
-
-
-
-
-
-
-
-
-
-
-//         if ($customers->isEmpty()) {
-//             return response()->json([
-//                 'status' => false,
-//                 'message' => 'No Customer Found!'
-//             ]);
-//         }
-//         return response()->json([
-//             'status' => true,
-//             'customers' => $customers
-//         ]);
-//     }
-
-public function get_all_customer(Request $request)
-{
-    $validator = Validator::make($request->all(), [
-        'min_date' => 'nullable|date',
-        'max_date' => 'nullable|date',
-        'filter' => 'nullable|in:all,machineuser,nomachineuser',
-    ]);
-
-    if ($validator->fails()) {
-        return response()->json([
-            'status' => false,
-            'message' => $validator->errors()->first(),
-        ], 400);
-    }
-
-    $threeMonthsAgo = Carbon::now()->subMonths(3);
-
-    // Base query
-    $customers = DB::table('customers')
-        ->leftJoin('machines', 'customers.machine_id', '=', 'machines.machine_id')
-        ->select('customers.*', 'machines.*');
-
-    // Apply date filters
-    if ($request->min_date) {
-        $customers->where('customers.inserted_date', '>=', $request->min_date);
-    } else {
-        // Default to 3 months ago
-        $customers->where('customers.inserted_date', '>=', $threeMonthsAgo);
-    }
-
-    if ($request->max_date) {
-        $customers->where('customers.inserted_date', '<=', $request->max_date);
-    }
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()->first(),
+            ], 400);
+        }
 
         $threeMonthsAgo = Carbon::now()->subMonths(3);
 
-    // Filter logic
-    if ($request->filter === 'machineuser') {
-        $customers->whereNotNull('customers.machine_id');
-    } elseif ($request->filter === 'nomachineuser') {
-        $customers->whereNull('customers.machine_id');
-    }
-     else {
+        // Base query
+        $customers = DB::table('customers')
+            ->leftJoin('machines', 'customers.machine_id', '=', 'machines.machine_id')
+            ->select('customers.*', 'machines.*');
+
+        // Apply date filters
+        if ($request->min_date) {
+            $customers->where('customers.inserted_date', '>=', $request->min_date);
+        } else {
+            // Default to 3 months ago
+            $customers->where('customers.inserted_date', '>=', $threeMonthsAgo);
+        }
+
+        if ($request->max_date) {
+            $customers->where('customers.inserted_date', '<=', $request->max_date);
+        }
+
+        $threeMonthsAgo = Carbon::now()->subMonths(3);
+
+        // Filter logic
+        if ($request->filter === 'machineuser') {
+            $customers->whereNotNull('customers.machine_id');
+        } elseif ($request->filter === 'nomachineuser') {
+            $customers->whereNull('customers.machine_id');
+        } else {
             $customers = $customers->where('inserted_date', '>=', $threeMonthsAgo);
-         }
+        }
 
-    // Sort
-    $customers = $customers->orderBy('customers.customer_id', 'desc')->get();
+        // Sort
+        $customers = $customers->orderBy('customers.customer_id', 'desc')->get();
 
-    if ($customers->isEmpty()) {
+        if ($customers->isEmpty()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'No Customer Found!',
+                'customers' => $customers
+            ]);
+        }
+
         return response()->json([
-            'status' => false,
-            'message' => 'No Customer Found!',
-            'customers'=>$customers
+            'status' => true,
+            'customers' => $customers
         ]);
     }
 
-    return response()->json([
-        'status' => true,
-        'customers' => $customers
-    ]);
-}
+    public function add_customer(Request $request){
+         $validator = Validator::make($request->all(), [
+            'name' => 'required',
+            'mobile' => 'required|unique:paitents,paitent_mobile',
+            'email' => 'required|email|unique:paitents,paitent_email',
+            'username' => 'required',
+            'machine_id' => 'required',
+            'address' => 'nullable',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()->first(),
+            ], 400);
+        }
+
+        // Set current time in Asia/Kolkata timezone
+        $currentDateTime = Carbon::now('Asia/Kolkata');
+        $insertDate = $currentDateTime->toDateString();
+        $insertTime = $currentDateTime->toTimeString();
+
+         $existing = DB::table('customers')
+            ->where('username', $request->username)
+            ->first();
+
+        if ($existing) {
+            return response()->json([
+                'status' => false,
+                'message' => 'This User already exists.'
+            ], 409);
+        }
+
+          // Prepare data
+        $commonData = [
+            'name'   => ucfirst(strtolower($request->name)),
+            'email'  => $request->email,
+            'mobile' => $request->mobile,
+            'username'         => $request->username,
+             'password' => Hash::make('Ronit@123'),
+            'address'        => $request->address,
+            'inserted_date'  => $insertDate,
+            'inserted_time'  => $insertTime,
+        ];
+         try {
+            $customerId = DB::table('customers')->insertGetId($commonData);
+            $customer = DB::table('customers')->where('customer_id', $customerId)->first();
+
+            // Generate auth token (requires password-based auth; adjust if you're not storing passwords)
+            $credentials = [
+                'email' => $request->email,
+                'password' => $request->password, // Uncomment and use if password is stored
+            ];
 
 
+            if (!$token = auth('customer_api')->attempt($credentials)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid credentials',
+                ], 401);
+            }
 
+              $customerResponse = $customer->toArray();
+            $customerResponse['token'] = $token;
+           return response()->json([
+                'status' => true,
+                'role' => $customer->role,
+                'message' => 'Customer Registered Successfully',
+                'customer' => $customerResponse,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred: ' . $e->getMessage(),
+            ], 500);
+        }
+
+
+    }
 }
