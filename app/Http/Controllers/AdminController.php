@@ -257,66 +257,64 @@ class AdminController extends Controller
 
     // user Details for Admin
 
- public function get_all_customer(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'min_date' => 'nullable|date',
-            'max_date' => 'nullable|date',
-            'filter' => 'nullable|in:all,machineUser,nomachineuser',
+//  public function get_all_customer(Request $request)
+//     {
+//         $validator = Validator::make($request->all(), [
+//             'min_date' => 'nullable|date',
+//             'max_date' => 'nullable|date',
+//             'filter' => 'nullable|in:all,machineUser,nomachineuser',
 
-        ]);
+//         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'message' => $validator->errors()->first(),
-            ], 400);
-        }
-
-
-        $threeMonthsAgo = Carbon::now()->subMonths(3);
-        $customers = DB::table('customers');
-
-        if ($request->min_date) {
-            $customers->where('customers.inserted_date', '>=', $request->min_date);
-        }
-
-        if ($request->max_date) {
-            $customers->where('customers.inserted_date', '<=', $request->max_date);
-        }
-        if($request->filter == "nomachineuser"){
-             $customers = DB::table('customers')
-                ->whereNull('customers.machine_id')
-                ->leftJoin('machines', 'customers.machine_id', '=', 'machines.machine_id')
-                ->select(
-                    'machines.*',
-                    'customers.*'
-                );
-
-        }
-        if($request->filter == "machineuser"){
-             $customers = DB::table('customers')
-                ->whereNotNull('customers.machine_id')
-                ->leftJoin('machines', 'customers.machine_id', '=', 'machines.machine_id')
-                ->select(
-                    'machines.*',
-                    'customers.*'
-                );
-        }
-
-        else {
+//         if ($validator->fails()) {
+//             return response()->json([
+//                 'status' => false,
+//                 'message' => $validator->errors()->first(),
+//             ], 400);
+//         }
 
 
-            $customers = $customers->where('inserted_date', '>=', $threeMonthsAgo)
-            ->leftJoin('machines', 'customers.machine_id', '=', 'machines.machine_id')
-            ->select('machines.*','customers.*');
-        }
+//         $threeMonthsAgo = Carbon::now()->subMonths(3);
+//         $customers = DB::table('customers');
+
+//         if ($request->min_date) {
+//             $customers->where('customers.inserted_date', '>=', $request->min_date);
+//         }
+
+//         if ($request->max_date) {
+//             $customers->where('customers.inserted_date', '<=', $request->max_date);
+//         }
+//         if($request->filter == "nomachineuser"){
+//              $customers = DB::table('customers')
+//                 ->whereNull('customers.machine_id')
+//                 ->leftJoin('machines', 'customers.machine_id', '=', 'machines.machine_id')
+//                 ->select(
+//                     'machines.*',
+//                     'customers.*'
+//                 );
+
+//         }
+//         if($request->filter == "machineuser"){
+//              $customers = DB::table('customers')
+//                 ->whereNotNull('customers.machine_id')
+//                 ->leftJoin('machines', 'customers.machine_id', '=', 'machines.machine_id')
+//                 ->select(
+//                     'machines.*',
+//                     'customers.*'
+//                 );
+//         }
+
+//         else {
 
 
-        $customers = $customers->orderBy('customers.customer_id', 'desc')
-            ->get();
+//             $customers = $customers->where('inserted_date', '>=', $threeMonthsAgo)
+//             ->leftJoin('machines', 'customers.machine_id', '=', 'machines.machine_id')
+//             ->select('machines.*','customers.*');
+//         }
 
 
+//         $customers = $customers->orderBy('customers.customer_id', 'desc')
+//             ->get();
 
 
 
@@ -326,17 +324,76 @@ class AdminController extends Controller
 
 
 
-        if ($customers->isEmpty()) {
-            return response()->json([
-                'status' => false,
-                'message' => 'No Customer Found!'
-            ]);
-        }
+
+
+//         if ($customers->isEmpty()) {
+//             return response()->json([
+//                 'status' => false,
+//                 'message' => 'No Customer Found!'
+//             ]);
+//         }
+//         return response()->json([
+//             'status' => true,
+//             'customers' => $customers
+//         ]);
+//     }
+
+public function get_all_customer(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'min_date' => 'nullable|date',
+        'max_date' => 'nullable|date',
+        'filter' => 'nullable|in:all,machineuser,nomachineuser',
+    ]);
+
+    if ($validator->fails()) {
         return response()->json([
-            'status' => true,
-            'customers' => $customers
+            'status' => false,
+            'message' => $validator->errors()->first(),
+        ], 400);
+    }
+
+    $threeMonthsAgo = Carbon::now()->subMonths(3);
+
+    // Base query
+    $customers = DB::table('customers')
+        ->leftJoin('machines', 'customers.machine_id', '=', 'machines.machine_id')
+        ->select('customers.*', 'machines.*');
+
+    // Apply date filters
+    if ($request->min_date) {
+        $customers->where('customers.inserted_date', '>=', $request->min_date);
+    } else {
+        // Default to 3 months ago
+        $customers->where('customers.inserted_date', '>=', $threeMonthsAgo);
+    }
+
+    if ($request->max_date) {
+        $customers->where('customers.inserted_date', '<=', $request->max_date);
+    }
+
+    // Filter logic
+    if ($request->filter === 'machineuser') {
+        $customers->whereNotNull('customers.machine_id');
+    } elseif ($request->filter === 'nomachineuser') {
+        $customers->whereNull('customers.machine_id');
+    }
+
+    // Sort
+    $customers = $customers->orderBy('customers.customer_id', 'desc')->get();
+
+    if ($customers->isEmpty()) {
+        return response()->json([
+            'status' => false,
+            'message' => 'No Customer Found!'
         ]);
     }
+
+    return response()->json([
+        'status' => true,
+        'customers' => $customers
+    ]);
+}
 
 
 
