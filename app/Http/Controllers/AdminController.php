@@ -371,7 +371,7 @@ class AdminController extends Controller
 
             // Generate auth token (requires password-based auth; adjust if you're not storing passwords)
             $credentials = [
-                'email' => $request->email,
+                'email' => $customer->email,
                 'password' => $request->password, // Uncomment and use if password is stored
             ];
 
@@ -387,7 +387,7 @@ class AdminController extends Controller
             $customerResponse['token'] = $token;
            return response()->json([
                 'status' => true,
-                'role' => $customer->role,
+                // 'role' => $customer->role,
                 'message' => 'Customer Registered Successfully',
                 'customer' => $customerResponse,
             ]);
