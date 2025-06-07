@@ -49,7 +49,7 @@ return [
         ],
         'paitent_api' => [
             'driver' => 'jwt',
-            'provider' => 'paitent',
+            'provider' => 'paitents',
         ],
     ],
 
