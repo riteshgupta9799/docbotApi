@@ -249,17 +249,18 @@ class PaitentController extends Controller
         $paitent = DB::table('paitents')->where('paitent_id', $paitentId)->first();
 
         // Generate auth token (requires password-based auth; adjust if you're not storing passwords)
-        $credentials = [
-            'paitent_email' => $request->paitent_email,
-            // 'password' => $request->password, // Uncomment and use if password is stored
-        ];
+        // $credentials = [
+        //     'paitent_email' => $request->paitent_email,
+        //     // 'password' => $request->password, // Uncomment and use if password is stored
+        // ];
+        $token = JWTAuth::fromUser($paitent);
 
-        if (!$token = auth('paitent_api')->attempt($credentials)) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Invalid credentials',
-            ], 401);
-        }
+        // if (!$token = auth('paitent_api')->attempt($credentials)) {
+        //     return response()->json([
+        //         'status' => false,
+        //         'message' => 'Invalid credentials',
+        //     ], 401);
+        // }
 
         return response()->json([
             'status'  => true,
