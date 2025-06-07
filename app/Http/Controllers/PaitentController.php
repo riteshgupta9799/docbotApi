@@ -45,12 +45,12 @@ class PaitentController extends Controller
         $otp = rand(1000, 9999);
         // dd($email);
         if ($email) {
-            $paitent = DB::table('paitent')
+            $paitent = DB::table('paitents')
                 ->where('paitent_email', $email)
                 ->first();
 
             if ($paitent) {
-                DB::table('paitent')
+                DB::table('paitents')
                     ->where('paitent_email', $email)
                     ->update([
                         "email_otp" => $otp
@@ -69,12 +69,12 @@ class PaitentController extends Controller
         }
 
         if ($mobile) {
-            $paitent = DB::table('paitent')
+            $paitent = DB::table('paitents')
                 ->where('paitent_mobile', $mobile)
                 ->first();
 
             if ($paitent) {
-                DB::table('paitent')
+                DB::table('paitents')
                     ->where('paitent_mobile', $mobile)
                     ->update([
                         "mobile_otp" => $otp
@@ -115,7 +115,7 @@ class PaitentController extends Controller
 
         if ($email) {
             // Check in paitent table
-            $paitent = DB::table('paitent')
+            $paitent = DB::table('paitents')
                 ->where('paitent_email', $email)
                 ->where('email_otp', $otp)
                 ->first();
@@ -149,7 +149,7 @@ class PaitentController extends Controller
 
         if ($mobile) {
             // Check in paitent table
-            $paitent = DB::table('paitent')
+            $paitent = DB::table('paitents')
                 ->where('paitent_mobile', $mobile)
                 ->where('mobile_otp', $otp)
                 ->first();
@@ -188,8 +188,8 @@ class PaitentController extends Controller
 {
     $validator = Validator::make($request->all(), [
         'paitent_name' => 'required',
-        'paitent_mobile' => 'required|unique:paitent,paitent_mobile',
-        'paitent_email' => 'required|email|unique:paitent,paitent_email',
+        'paitent_mobile' => 'required|unique:paitents,paitent_mobile',
+        'paitent_email' => 'required|email|unique:paitents,paitent_email',
         'gender' => 'required',
         'dob' => 'required|date',
         'address' => 'nullable',
@@ -208,7 +208,7 @@ class PaitentController extends Controller
     $insertTime = $currentDateTime->toTimeString();
 
     // Check if mobile already exists
-    $existing = DB::table('paitent')
+    $existing = DB::table('paitents')
         ->where('paitent_mobile', $request->paitent_mobile)
         ->first();
 
@@ -220,7 +220,7 @@ class PaitentController extends Controller
     }
 
     // Optional: Check if email is blocked in another table
-    $existingEmail = DB::table('paitent')
+    $existingEmail = DB::table('paitents')
         ->where('paitent_email', $request->paitent_email)
         ->first();
 
@@ -245,8 +245,8 @@ class PaitentController extends Controller
 
     try {
         // Insert and retrieve the new patient
-        $paitentId = DB::table('paitent')->insertGetId($commonData);
-        $paitent = DB::table('paitent')->where('paitent_id', $paitentId)->first();
+        $paitentId = DB::table('paitents')->insertGetId($commonData);
+        $paitent = DB::table('paitents')->where('paitent_id', $paitentId)->first();
 
         // Generate auth token (requires password-based auth; adjust if you're not storing passwords)
         $credentials = [
