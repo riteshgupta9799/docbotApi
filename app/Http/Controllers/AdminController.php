@@ -385,7 +385,8 @@ public function get_all_customer(Request $request)
     if ($customers->isEmpty()) {
         return response()->json([
             'status' => false,
-            'message' => 'No Customer Found!'
+            'message' => 'No Customer Found!',
+            'customers'=>$customers
         ]);
     }
 
