@@ -29,7 +29,7 @@ Route::prefix('admin')->middleware(['jwt.auth', 'admin'])->group(function () {
     Route::post('/get_all_customer', [AdminController::class, 'get_all_customer']);
 
     // addUser
-    Route::post('/register_customer', [AdminController::class, 'register_customer']);
+    Route::post('/add_customer', [AdminController::class, 'add_customer']);
 });
 
     // paitent Send Otp
