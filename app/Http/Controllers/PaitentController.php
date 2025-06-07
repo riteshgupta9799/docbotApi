@@ -246,14 +246,16 @@ class PaitentController extends Controller
     try {
         // Insert and retrieve the new patient
         $paitentId = DB::table('paitents')->insertGetId($commonData);
-        $paitent = DB::table('paitents')->where('paitent_id', $paitentId)->first();
+        // $paitent = DB::table('paitents')->where('paitent_id', $paitentId)->first();
 
         // Generate auth token (requires password-based auth; adjust if you're not storing passwords)
         // $credentials = [
         //     'paitent_email' => $request->paitent_email,
         //     // 'password' => $request->password, // Uncomment and use if password is stored
         // ];
-        $token = JWTAuth::fromUser($paitent);
+      $paitent = \App\Models\Paitents::find($paitentId); // ✅ Corrected
+
+$token = JWTAuth::fromUser($paitent); // ✅ Will now work
 
         // if (!$token = auth('paitent_api')->attempt($credentials)) {
         //     return response()->json([
