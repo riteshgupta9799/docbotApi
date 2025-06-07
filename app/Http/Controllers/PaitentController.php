@@ -267,7 +267,20 @@ class PaitentController extends Controller
             return response()->json([
                 'status'  => true,
                 'message' => 'Patient registered successfully',
-                'paitent' => array_merge((array)$paitent, ['token' => $token]),
+                'paitent' => array_merge(
+                    $paitent->only([
+                        'paitent_id',
+                        'paitent_name',
+                        'paitent_email',
+                        'paitent_mobile',
+                        'gender',
+                        'dob',
+                        'address',
+                        'inserted_date',
+                        'inserted_time',
+                    ]),
+                    ['token' => $token]
+                ),
             ]);
         } catch (\Exception $e) {
             return response()->json([
