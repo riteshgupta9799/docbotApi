@@ -360,7 +360,7 @@ class AdminController extends Controller
             'email'  => $request->email,
             'mobile' => $request->mobile,
             'username'         => $request->username,
-             'password' => Hash::make('Ronit@123'),
+             'password' => Hash::make($request->password),
             'address'        => $request->address,
             'inserted_date'  => $insertDate,
             'inserted_time'  => $insertTime,
