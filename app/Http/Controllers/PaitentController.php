@@ -124,7 +124,7 @@ class PaitentController extends Controller
                 return response()->json([
                     'status' => true,
                     'message' => 'Email OTP verified successfully.',
-                    'Existingpaitent'=>true,
+                    'Existingpaitent' => true,
 
 
                 ]);
@@ -140,7 +140,7 @@ class PaitentController extends Controller
                 return response()->json([
                     'status' => true,
                     'message' => 'Email OTP verified (open_otp).',
-                    'paitent'=>false
+                    'paitent' => false
 
 
                 ]);
@@ -158,7 +158,7 @@ class PaitentController extends Controller
                 return response()->json([
                     'status' => true,
                     'message' => 'Mobile OTP verified successfully.',
-                    'paitent'=>true
+                    'paitent' => true
 
                 ]);
             }
@@ -173,7 +173,7 @@ class PaitentController extends Controller
                 return response()->json([
                     'status' => true,
                     'message' => 'Mobile OTP verified (open_otp).',
-                    'paitent'=>false
+                    'paitent' => false
 
                 ]);
             }
@@ -184,97 +184,96 @@ class PaitentController extends Controller
             'message' => 'Invalid OTP or no matching record found.',
         ], 400);
     }
-   public function register_paitent(Request $request)
-{
-    $validator = Validator::make($request->all(), [
-        'paitent_name' => 'required',
-        'paitent_mobile' => 'required|unique:paitents,paitent_mobile',
-        'paitent_email' => 'required|email|unique:paitents,paitent_email',
-        'gender' => 'required',
-        'dob' => 'required|date',
-        'address' => 'nullable',
-    ]);
-
-    if ($validator->fails()) {
-        return response()->json([
-            'status' => false,
-            'message' => $validator->errors()->first(),
-        ], 400);
-    }
-
-    // Set current time in Asia/Kolkata timezone
-    $currentDateTime = Carbon::now('Asia/Kolkata');
-    $insertDate = $currentDateTime->toDateString();
-    $insertTime = $currentDateTime->toTimeString();
-
-    // Check if mobile already exists
-    $existing = DB::table('paitents')
-        ->where('paitent_mobile', $request->paitent_mobile)
-        ->first();
-
-    if ($existing) {
-        return response()->json([
-            'status' => false,
-            'message' => 'Mobile number already exists.'
-        ], 409);
-    }
-
-    // Optional: Check if email is blocked in another table
-    $existingEmail = DB::table('paitents')
-        ->where('paitent_email', $request->paitent_email)
-        ->first();
-
-    if ($existingEmail) {
-        return response()->json([
-            'status' => false,
-            'message' => 'This email is restricted from creating an account.'
-        ], 403);
-    }
-
-    // Prepare data
-    $commonData = [
-        'paitent_name'   => ucfirst(strtolower($request->paitent_name)),
-        'paitent_email'  => $request->paitent_email,
-        'paitent_mobile' => $request->paitent_mobile,
-        'gender'         => $request->gender,
-        'dob'            => $request->dob,
-        'address'        => $request->address,
-        'inserted_date'  => $insertDate,
-        'inserted_time'  => $insertTime,
-    ];
-
-    try {
-        // Insert and retrieve the new patient
-        $paitentId = DB::table('paitents')->insertGetId($commonData);
-        // $paitent = DB::table('paitents')->where('paitent_id', $paitentId)->first();
-
-        // Generate auth token (requires password-based auth; adjust if you're not storing passwords)
-        // $credentials = [
-        //     'paitent_email' => $request->paitent_email,
-        //     // 'password' => $request->password, // Uncomment and use if password is stored
-        // ];
-      $paitent = \App\Models\Paitents::find($paitentId); // ✅ Corrected
-
-$token = JWTAuth::fromUser($paitent); // ✅ Will now work
-
-        // if (!$token = auth('paitent_api')->attempt($credentials)) {
-        //     return response()->json([
-        //         'status' => false,
-        //         'message' => 'Invalid credentials',
-        //     ], 401);
-        // }
-
-        return response()->json([
-            'status'  => true,
-            'message' => 'Patient registered successfully',
-            'paitent' => array_merge((array)$paitent, ['token' => $token]),
+    public function register_paitent(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'paitent_name' => 'required',
+            'paitent_mobile' => 'required|unique:paitents,paitent_mobile',
+            'paitent_email' => 'required|email|unique:paitents,paitent_email',
+            'gender' => 'required',
+            'dob' => 'required|date',
+            'address' => 'nullable',
         ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'status' => false,
-            'message' => 'An error occurred: ' . $e->getMessage(),
-        ], 500);
-    }
-}
 
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()->first(),
+            ], 400);
+        }
+
+        // Set current time in Asia/Kolkata timezone
+        $currentDateTime = Carbon::now('Asia/Kolkata');
+        $insertDate = $currentDateTime->toDateString();
+        $insertTime = $currentDateTime->toTimeString();
+
+        // Check if mobile already exists
+        $existing = DB::table('paitents')
+            ->where('paitent_mobile', $request->paitent_mobile)
+            ->first();
+
+        if ($existing) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Mobile number already exists.'
+            ], 409);
+        }
+
+        // Optional: Check if email is blocked in another table
+        $existingEmail = DB::table('paitents')
+            ->where('paitent_email', $request->paitent_email)
+            ->first();
+
+        if ($existingEmail) {
+            return response()->json([
+                'status' => false,
+                'message' => 'This email is restricted from creating an account.'
+            ], 403);
+        }
+
+        // Prepare data
+        $commonData = [
+            'paitent_name'   => ucfirst(strtolower($request->paitent_name)),
+            'paitent_email'  => $request->paitent_email,
+            'paitent_mobile' => $request->paitent_mobile,
+            'gender'         => $request->gender,
+            'dob'            => $request->dob,
+            'address'        => $request->address,
+            'inserted_date'  => $insertDate,
+            'inserted_time'  => $insertTime,
+        ];
+
+        try {
+            // Insert and retrieve the new patient
+            $paitentId = DB::table('paitents')->insertGetId($commonData);
+            // $paitent = DB::table('paitents')->where('paitent_id', $paitentId)->first();
+
+            // Generate auth token (requires password-based auth; adjust if you're not storing passwords)
+            // $credentials = [
+            //     'paitent_email' => $request->paitent_email,
+            //     // 'password' => $request->password, // Uncomment and use if password is stored
+            // ];
+            $paitent = \App\Models\Paitents::find($paitentId); // ✅ Corrected
+
+            $token = JWTAuth::fromUser($paitent); // ✅ Will now work
+
+            // if (!$token = auth('paitent_api')->attempt($credentials)) {
+            //     return response()->json([
+            //         'status' => false,
+            //         'message' => 'Invalid credentials',
+            //     ], 401);
+            // }
+
+            return response()->json([
+                'status'  => true,
+                'message' => 'Patient registered successfully',
+                'paitent' => array_merge((array)$paitent, ['token' => $token]),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
 }
