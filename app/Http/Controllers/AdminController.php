@@ -323,14 +323,16 @@ class AdminController extends Controller
         ]);
     }
 
-    public function add_customer(Request $request){
-         $validator = Validator::make($request->all(), [
+    public function add_customer(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
             'name' => 'required',
             'mobile' => 'required|unique:paitents,paitent_mobile',
             'email' => 'required|email|unique:paitents,paitent_email',
             'username' => 'required',
             'machine_id' => 'required',
             'address' => 'nullable',
+            'passwrod' => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -345,7 +347,7 @@ class AdminController extends Controller
         $insertDate = $currentDateTime->toDateString();
         $insertTime = $currentDateTime->toTimeString();
 
-         $existing = DB::table('customers')
+        $existing = DB::table('customers')
             ->where('username', $request->username)
             ->first();
 
@@ -356,33 +358,35 @@ class AdminController extends Controller
             ], 409);
         }
 
-          // Prepare data
+        // Prepare data
         $commonData = [
             'name'   => ucfirst(strtolower($request->name)),
             'email'  => $request->email,
             'mobile' => $request->mobile,
             'username'         => $request->username,
-             'password' => Hash::make($request->password),
+            'customer_unique_id' => Str::uuid(),
+            'password' => Hash::make($request->password),
             'address'        => $request->address,
+            'machine_id'        => $request->machine_id,
             'inserted_date'  => $insertDate,
             'inserted_time'  => $insertTime,
         ];
-         try {
+        try {
             $customerId = DB::table('customers')->insertGetId($commonData);
             // $customer = DB::table('customers')->where('customer_id', $customerId)->first();
 
-           // Retrieve Eloquent model for token generation
-        $customerModel = \App\Models\Customer::find($customerId);
+            // Retrieve Eloquent model for token generation
+            $customerModel = \App\Models\Customer::find($customerId);
 
-        // Generate token
-        $token = JWTAuth::fromUser($customerModel);
+            // Generate token
+            $token = JWTAuth::fromUser($customerModel);
 
 
-           return response()->json([
+            return response()->json([
                 'status' => true,
                 // 'role' => $customer->role,
                 'message' => 'Customer Registered Successfully',
-               'customer' => array_merge($customerModel->toArray(), ['token' => $token]),
+                'customer' => array_merge($customerModel->toArray(), ['token' => $token]),
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -390,7 +394,118 @@ class AdminController extends Controller
                 'message' => 'An error occurred: ' . $e->getMessage(),
             ], 500);
         }
-
-
     }
+
+    // updateCustomergi
+    public function update_customer(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'customer_unique_id' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()->first(),
+            ], 400);
+        }
+
+        // Set current time in Asia/Kolkata timezone
+        $currentDateTime = Carbon::now('Asia/Kolkata');
+        $insertDate = $currentDateTime->toDateString();
+        $insertTime = $currentDateTime->toTimeString();
+
+        $customer = DB::table('customers')
+            ->where('customer_unique_id', $request->customer_unique_id)
+            ->first();
+
+        if (!$customer) {
+            return response()->json([
+                'status' => false,
+                'message' => 'user Not Found'
+            ]);
+        }
+
+        // Prepare data
+        $commonData = [
+            'name'   => ucfirst(strtolower($request->name)) ?? $customer->name,
+            'email'  => $request->email ?? $customer->email,
+            'mobile' => $request->mobile ?? $customer->mobile,
+            'username'         => $request->username ?? $customer->username,
+            'customer_unique_id' => Str::uuid(),
+            'password' => Hash::make($request->password) ?? $customer->password,
+            'address'        => $request->address ?? $customer->address,
+            'machine_id'        => $request->machine_id ?? $customer->machine_id,
+            'inserted_date'  => $insertDate,
+            'inserted_time'  => $insertTime,
+        ];
+        try {
+            $customerId = DB::table('customers')
+                ->where('customer_unique_id', $request->customer_unique_id)
+                ->update($commonData);
+
+
+
+            return response()->json([
+                'status' => true,
+
+                'message' => 'Customer Update Successfully',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    // delete customer
+    public function delete_customer(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'customer_unique_id' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()->first(),
+            ], 400);
+        }
+
+
+        $customer = DB::table('customers')
+            ->where('customer_unique_id', $request->customer_unique_id)
+            ->first();
+
+        if (!$customer) {
+            return response()->json([
+                'status' => false,
+                'message' => 'user Not Found'
+            ]);
+        }
+
+        // Prepare data
+
+        try {
+            $customer = DB::table('customers')
+                ->where('customer_unique_id', $request->customer_unique_id)
+                ->delete();
+
+
+
+            return response()->json([
+                'status' => true,
+
+                'message' => 'Customer Delete Successfully',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+
 }

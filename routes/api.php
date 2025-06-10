@@ -30,6 +30,12 @@ Route::prefix('admin')->middleware(['jwt.auth', 'admin'])->group(function () {
 
     // addUser
     Route::post('/add_customer', [AdminController::class, 'add_customer']);
+
+    // UpdateUser
+    Route::post('/update_customer', [AdminController::class, 'update_customer']);
+
+    // Deleteser
+    Route::post('/delete_customer', [AdminController::class, 'delete_customer']);
 });
 
     // paitent Send Otp
@@ -41,4 +47,7 @@ Route::prefix('admin')->middleware(['jwt.auth', 'admin'])->group(function () {
        // register_paitent
     Route::post('/register_paitent', [PaitentController::class, 'register_paitent']);
 
-       // register_paitent
+       // get_verify_key
+    Route::post('/get_verify_key', [CustomerController::class, 'get_verify_key']);
+
+
