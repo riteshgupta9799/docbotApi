@@ -50,4 +50,7 @@ Route::prefix('admin')->middleware(['jwt.auth', 'admin'])->group(function () {
        // get_verify_key
     Route::post('/get_verify_key', [CustomerController::class, 'get_verify_key']);
 
+       // token verify key
+    Route::post('/verifyToken', [CustomerController::class, 'verifyToken']);
+
 

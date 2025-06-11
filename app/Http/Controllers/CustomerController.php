@@ -149,6 +149,36 @@ class CustomerController extends Controller
         ]);
     }
 
+    public function verifyToken(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'token' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()->first(),
+            ], 400);
+        }
+
+        // Try to find a customer with the provided token
+        $customer = Customer::where('token', $request->token)->first();
+
+        if (!$customer) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Invalid or expired token.',
+            ], 401);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Token is valid.',
+            'customer' => $customer,
+        ], 200);
+    }
+
     public function get_verify_key(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -177,7 +207,7 @@ class CustomerController extends Controller
         return response()->json([
             'status' => true,
             'message' => ' Machine Found',
-            'machine_verify_key'=>$machine->verification_key
+            'machine_verify_key' => $machine->verification_key
         ]);
     }
 }
