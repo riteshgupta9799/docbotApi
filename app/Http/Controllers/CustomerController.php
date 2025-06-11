@@ -74,6 +74,12 @@ class CustomerController extends Controller
             ->where('machine_id', $customer['machine_id'])
             ->first();
 
+          $customerToken = DB::table('customers')
+                            ->where('customer_id',$customer['customer_id'])
+                            ->update([
+                                'token'=>$token
+                            ]);
+
 
         return response()->json([
             'status' => true,
