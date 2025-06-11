@@ -53,4 +53,7 @@ Route::prefix('admin')->middleware(['jwt.auth', 'admin'])->group(function () {
        // token verify key
     Route::post('/verifyToken', [CustomerController::class, 'verifyToken']);
 
+       // logout
+    Route::post('/logout', [CustomerController::class, 'logout']);
+
 

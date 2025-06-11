@@ -183,7 +183,7 @@ class CustomerController extends Controller
     {
         $validator = Validator::make($request->all(), [
 
-            'machine_id' => 'required',
+            'machine_unique_id' => 'required',
 
         ]);
 
@@ -195,7 +195,7 @@ class CustomerController extends Controller
         }
 
         $machine = DB::table('machines')
-            ->where('machine_id', $request->machine_id)
+            ->where('machine_unique_id', $request->machine_unique_id)
             ->first();
 
         if (!$machine) {
@@ -208,6 +208,46 @@ class CustomerController extends Controller
             'status' => true,
             'message' => ' Machine Found',
             'machine_verify_key' => $machine->verification_key
+        ]);
+    }
+
+
+    public function logout(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+
+            'customer_unique_id' => 'required',
+
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()->first(),
+            ], 400);
+        }
+        $customer = DB::table('customers')
+            ->where('customer_unique_id', $request->customer_unique_id)
+            ->first();
+
+        if (!$customer) {
+            return response()->json([
+                'status' => false,
+                'message' => 'No customer Found'
+            ]);
+        }
+
+
+        DB::table('customers')
+            ->where('customer_unique_id', $request->customer_unique_id)
+            ->update([
+                'token' => null
+            ]);
+
+        return response()->json([
+            'status' => true,
+            'message' => ' User Logout Successfully',
+
         ]);
     }
 }
