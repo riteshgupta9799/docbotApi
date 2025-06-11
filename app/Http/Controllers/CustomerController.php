@@ -67,6 +67,7 @@ class CustomerController extends Controller
 
 
         $user->customer_profile = ($user->customer_profile);
+        $user->update(['token' => $token]);
         $customer = $user->toArray();
         $customer['token'] = $token;
 
@@ -74,11 +75,7 @@ class CustomerController extends Controller
             ->where('machine_id', $customer['machine_id'])
             ->first();
 
-          $customerToken = DB::table('customers')
-                            ->where('customer_id',$customer['customer_id'])
-                            ->update([
-                                'token'=>$token
-                            ]);
+
 
 
         return response()->json([
