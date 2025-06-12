@@ -286,7 +286,7 @@ class PaitentController extends Controller
             ], 400);
         }
 
-        $paitent= DB::table('paitent_unique_id')
+        $paitent= DB::table('paitents')
                     ->where('paitent_unique_id',$request->paitent_unique_id)
                     ->first();
 

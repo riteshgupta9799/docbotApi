@@ -398,7 +398,7 @@ class CustomerController extends Controller
     }
 
     public function getFaq(){
-        $data = DB::table('faqs')->where('status','Active')->get();
+        $data = DB::table('faqs')->where('status','Active')->orderBy('faq_id','desc')->get();
         if($data->isEmpty()){
             return response()->json([
                 'status'=>false,
@@ -406,7 +406,7 @@ class CustomerController extends Controller
             ]);
         }
         return response()->json([
-                'status'=>false,
+                'status'=>true,
                 'message'=>'Faq Data Found',
                 'faq'=>$data
             ]);
