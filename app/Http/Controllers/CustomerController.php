@@ -250,4 +250,69 @@ class CustomerController extends Controller
 
         ]);
     }
+
+    public function customer_data(Request $request)
+    {
+        if (!Auth::guard('customer_api')->check()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Unauthorized access.',
+            ], 400);
+        }
+
+        $validator = Validator::make($request->all(), [
+            "customer_unique_id" => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()->first(),
+            ], 400);
+        }
+
+        $customer = Auth::guard('customer_api')->user();
+
+        $customer_unique_id = $request->customer_unique_id;
+
+        if ($customer->customer_unique_id !== $customer_unique_id) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Customer unique ID does not match.',
+            ], 400);
+        }
+
+        if ($customer_unique_id) {
+
+            $customer = Customer::where('customer_unique_id', $customer_unique_id)->first();
+            $customers = DB::table('customers')->where('customer_id', $customer->customer_id)
+                ->leftJoin('machines','customers.machine_id','=','machines.machine_id')
+                ->select('customers.customer_unique_id', 'customers.customer_profile', 'customers.name', 'customers.username', 'customers.email', 'customers.mobile', 'machines.machine_unique_id')
+                ->orderBy('customers.customer_id', 'desc')
+                ->first();
+
+            if (!empty($customers)) {
+                // Check if the customer profile image exists and append the full URL
+                if ($customers->customer_profile) {
+                    $customers->customer_profile = asset($customers->customer_profile);
+                }
+
+                return response()->json([
+                    'status' => true,
+                    'message' => "Customer Found Successfully",
+                    "customer_data" => $customers
+                ]);
+            } else {
+                return response()->json([
+                    'status' => false,
+                    'message' => "Customer Not Found"
+                ]);
+            }
+        } else {
+            return response()->json([
+                'status' => false,
+                'message' => "Customer ID Required"
+            ]);
+        }
+    }
 }

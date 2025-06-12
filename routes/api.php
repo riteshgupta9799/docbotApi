@@ -57,3 +57,7 @@ Route::prefix('admin')->middleware(['jwt.auth', 'admin'])->group(function () {
     Route::post('/logout', [CustomerController::class, 'logout']);
 
 
+    // customer Data
+    Route::post('/customer_data', [CustomerController::class, 'customer_data']);
+
+

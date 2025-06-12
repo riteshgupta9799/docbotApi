@@ -289,4 +289,6 @@ class PaitentController extends Controller
             ], 500);
         }
     }
+
+
 }
