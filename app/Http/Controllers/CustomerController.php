@@ -43,6 +43,13 @@ class CustomerController extends Controller
         $userNew = Customer::where('username', $request->username)->first();
 
 
+        if($userNew->token !== null){
+            return response()->json([
+                'status'=>false,
+                'message'=>'First logout in another devices'
+            ]);
+        }
+
         if (!$user) {
 
             return response()->json([
