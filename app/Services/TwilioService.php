@@ -19,16 +19,17 @@ class TwilioService
         $this->from = config('services.twilio.whatsapp_from');
     }
 
- public function sendOtpUsingSmsTemplate($to, $otp)
+public function sendOtpUsingSmsTemplate($to, $otp)
 {
     return $this->client->messages->create($to, [
-        'from' => $this->from,
+        'from' => $this->from,  // Must be your Twilio SMS-enabled number
         'contentSid' => 'HX7ce26a871bfa03f1fba9a1d4c7a6de9a',
         'contentVariables' => json_encode([
-            'otp' => $otp  // ✅ must match {{otp}} from the template
+            'otp' => (string) $otp  // Must be string and key should match `{{otp}}`
         ]),
     ]);
 }
+
 
 
 }
