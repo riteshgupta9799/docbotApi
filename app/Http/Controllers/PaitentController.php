@@ -31,7 +31,7 @@ class PaitentController extends Controller
 
         $validator = Validator::make($request->all(), [
 
-            "mobile" => 'required|digits:10'
+            "mobile" => 'required'
         ]);
 
         if ($validator->fails()) {
