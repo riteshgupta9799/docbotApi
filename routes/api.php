@@ -66,4 +66,7 @@ Route::prefix('admin')->middleware(['jwt.auth', 'admin'])->group(function () {
     // dlete customer Data
     Route::post('/delete_account', [CustomerController::class, 'delete_account']);
 
+    // get faq Data
+    Route::get('/getFaq', [CustomerController::class, 'getFaq']);
+
 

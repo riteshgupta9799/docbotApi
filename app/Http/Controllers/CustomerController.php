@@ -396,4 +396,19 @@ class CustomerController extends Controller
             'message' => 'Account  Has Been Deleted   successfully'
         ]);
     }
+
+    public function getFaq(){
+        $data = DB::table('faqs')->where('status','Active')->get();
+        if($data->isEmpty()){
+            return response()->json([
+                'status'=>false,
+                'message'=>'No faq Found'
+            ]);
+        }
+        return response()->json([
+                'status'=>false,
+                'message'=>'Faq Data Found',
+                'faq'=>$data
+            ]);
+    }
 }
