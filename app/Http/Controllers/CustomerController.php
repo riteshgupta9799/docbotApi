@@ -253,15 +253,13 @@ class CustomerController extends Controller
 
     public function customer_data(Request $request)
     {
-        if (!Auth::guard('customer_api')->check()) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Unauthorized access.',
-            ], 400);
-        }
+
+
+
 
         $validator = Validator::make($request->all(), [
-            "customer_unique_id" => 'required'
+            "customer_unique_id" => 'required',
+             'token' => 'required|string',
         ]);
 
         if ($validator->fails()) {
@@ -271,7 +269,16 @@ class CustomerController extends Controller
             ], 400);
         }
 
-        $customer = Auth::guard('customer_api')->user();
+         // Try to find a customer with the provided token
+        $customer = Customer::where('token', $request->token)->first();
+
+        if (!$customer) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Invalid or expired token.',
+            ], 401);
+        }
+
 
         $customer_unique_id = $request->customer_unique_id;
 

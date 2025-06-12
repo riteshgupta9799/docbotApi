@@ -254,4 +254,41 @@ class PaitentController extends Controller
             ], 500);
         }
     }
+
+    public function paitentData(Request $request){
+
+           if (!Auth::guard('paitent_api')->check()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Unauthorized access.',
+            ], 400);
+        }
+         $validator = Validator::make($request->all(), [
+           'paitent_unique_id'=>'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()->first(),
+            ], 400);
+        }
+
+        $paitent= DB::table('paitent_unique_id')
+                    ->where('paitent_unique_id',$request->paitent_unique_id)
+                    ->first();
+
+             if($paitent){
+                return response()->json([
+                    'status'=>true,
+                    'message'=>'Paitent Found',
+                    'paitent'=>$paitent
+                ]);
+             }
+                return response()->json([
+                    'status'=>false,
+                    'message'=>'Paitent  not Found',
+
+                ]);
+    }
 }

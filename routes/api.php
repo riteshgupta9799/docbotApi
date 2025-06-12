@@ -60,4 +60,7 @@ Route::prefix('admin')->middleware(['jwt.auth', 'admin'])->group(function () {
     // customer Data
     Route::post('/customer_data', [CustomerController::class, 'customer_data']);
 
+    // paitentData Data
+    Route::post('/paitentData', [CustomerController::class, 'paitentData']);
+
 
