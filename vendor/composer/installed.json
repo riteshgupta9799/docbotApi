@@ -12877,30 +12877,31 @@
         },
         {
             "name": "twilio/sdk",
-            "version": "8.3.9",
-            "version_normalized": "8.3.9.0",
+            "version": "8.6.2",
+            "version_normalized": "8.6.2.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/twilio/twilio-php.git",
-                "reference": "b8a79247ad00daed6f823328a052293d498fac36"
+                "url": "https://github.com/twilio/twilio-php",
+                "reference": "b9c2b44392727bb22ee99d5972e7cbe361036fcc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/twilio/twilio-php/zipball/b8a79247ad00daed6f823328a052293d498fac36",
-                "reference": "b8a79247ad00daed6f823328a052293d498fac36",
+                "url": "https://api.github.com/repos/twilio/twilio-php/zipball/b9c2b44392727bb22ee99d5972e7cbe361036fcc",
+                "reference": "b9c2b44392727bb22ee99d5972e7cbe361036fcc",
                 "shasum": ""
             },
             "require": {
                 "php": ">=7.1.0"
             },
             "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.0",
                 "guzzlehttp/guzzle": "^6.3 || ^7.0",
                 "phpunit/phpunit": ">=7.0 < 10"
             },
             "suggest": {
                 "guzzlehttp/guzzle": "An HTTP client to execute the API requests"
             },
-            "time": "2024-12-05T10:18:30+00:00",
+            "time": "2025-05-29T12:18:35+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -12925,10 +12926,6 @@
                 "sms",
                 "twilio"
             ],
-            "support": {
-                "issues": "https://github.com/twilio/twilio-php/issues",
-                "source": "https://github.com/twilio/twilio-php/tree/8.3.9"
-            },
             "install-path": "../twilio/sdk"
         },
         {
