@@ -16,7 +16,8 @@ class TwilioService
             config('services.twilio.token')
         );
 
-        $this->from = config('services.twilio.whatsapp_from');
+       $this->from = config('services.twilio.sms_from');
+
     }
 
 public function sendOtpUsingSmsTemplate($to, $otp)
