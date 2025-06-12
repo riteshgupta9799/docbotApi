@@ -119,6 +119,12 @@ class CustomerController extends Controller
         $userNew = User::where('email', $request->email)->first();
 
 
+        if($userNew->status=='Inactive'){
+             return response()->json([
+                'status' => false,
+                'message' => 'Your Account Has Been Deleted'
+            ]);
+        }
         if (!$user) {
 
             return response()->json([
@@ -328,5 +334,64 @@ class CustomerController extends Controller
                 'message' => "Customer ID Required"
             ]);
         }
+    }
+
+      public function delete_account(Request $request) // customer side
+    {
+
+        $validator = Validator::make($request->all(), [
+            'customer_unique_id' => 'required',
+            'token'=>'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()->first(),
+            ], 400);
+        }
+           // Try to find a customer with the provided token
+        $customer = Customer::where('token', $request->token)->first();
+
+        if (!$customer) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Invalid or expired token.',
+            ], 401);
+        }
+
+
+        $customers = Customer::where('customer_unique_id', $customer->customer_unique_id)->first();
+        if (!$customers) {
+            return response()->json([
+                'status' => false,
+                'message' => 'No Customer Found!'
+            ]);
+        }
+        $currentDateTime = Carbon::now('Asia/Kolkata');
+        $insertDate = $currentDateTime->toDateString();
+        $insertTime = $currentDateTime->toTimeString();
+        $existing = Customer::where('customer_id', $customers->customer_id)->where('status', 'Inactive')->first();
+        if ($existing) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Account is Alredy Deleted'
+            ]);
+        }
+        $delete = Customer::where('customer_id', $customers->customer_id)->update([
+            'status' => 'Inactive',
+            'token' => null,
+
+        ]);
+
+
+
+
+
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Account  Has Been Deleted   successfully'
+        ]);
     }
 }
