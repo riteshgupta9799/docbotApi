@@ -21,10 +21,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use App\Services\TwilioService;
 
 class PaitentController extends Controller
 {
-    public function send_otp(Request $request)
+    public function send_otp(Request $request,TwilioService $twilio)
     {
 
 
@@ -44,7 +45,15 @@ class PaitentController extends Controller
         $mobile = $request->mobile;
         $otp = rand(1000, 9999);
         // dd($email);
-
+        try {
+            // Send OTP using Twilio WhatsApp Template
+            $twilio->sendOtpUsingTemplate($mobile, $otp);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to send OTP: ' . $e->getMessage()
+            ], 500);
+        }
 
         if ($mobile) {
             $paitent = DB::table('paitents')
@@ -52,6 +61,9 @@ class PaitentController extends Controller
                 ->first();
 
             if ($paitent) {
+                //  $twilio->sendOtpUsingTemplate($mobile,  $otp);
+
+
                 DB::table('paitents')
                     ->where('paitent_mobile', $mobile)
                     ->update([
