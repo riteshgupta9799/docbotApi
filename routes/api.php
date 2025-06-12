@@ -63,4 +63,7 @@ Route::prefix('admin')->middleware(['jwt.auth', 'admin'])->group(function () {
     // paitentData Data
     Route::post('/paitentData', [CustomerController::class, 'paitentData']);
 
+    // dlete customer Data
+    Route::post('/delete_account', [CustomerController::class, 'delete_account']);
+
 
