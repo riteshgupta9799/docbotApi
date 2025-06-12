@@ -29,7 +29,7 @@ class PaitentController extends Controller
 
 
         $validator = Validator::make($request->all(), [
-            "email" => 'nullable|email',
+
             "mobile" => 'nullable'
         ]);
 
@@ -40,33 +40,11 @@ class PaitentController extends Controller
             ], 400);
         }
 
-        $email = $request->email;
+
         $mobile = $request->mobile;
         $otp = rand(1000, 9999);
         // dd($email);
-        if ($email) {
-            $paitent = DB::table('paitents')
-                ->where('paitent_email', $email)
-                ->first();
 
-            if ($paitent) {
-                DB::table('paitents')
-                    ->where('paitent_email', $email)
-                    ->update([
-                        "email_otp" => $otp
-                    ]);
-            } else {
-                DB::table('open_otp')->updateOrInsert(
-                    ['email' => $email],
-                    ['otp' => $otp]
-                );
-
-                // DB::table('open_otp')->insert([
-                //     'email'=>$email,
-                //     'otp'=>$otp,
-                // ]);
-            }
-        }
 
         if ($mobile) {
             $paitent = DB::table('paitents')
@@ -79,27 +57,33 @@ class PaitentController extends Controller
                     ->update([
                         "mobile_otp" => $otp
                     ]);
+                return response()->json([
+                    'status' => true,
+                    'message' => 'OTP sent successfully.',
+                    'otp' => $otp,
+                    'existingPaitent' => true
+                ]);
             } else {
                 DB::table('open_otp')->updateOrInsert(
                     ['mobile' => $mobile],
                     ['otp' => $otp]
                 );
+                return response()->json([
+                    'status' => true,
+                    'message' => 'OTP sent successfully.',
+                    'otp' => $otp,
+                    'existingPaitent' => false
+                ]);
             }
         }
-
-        return response()->json([
-            'status' => true,
-            'message' => 'OTP sent successfully.',
-            'otp' => $otp // Optional: for testing or dev purposes
-        ]);
     }
 
     public function verify_otp(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            "email" => 'nullable|email',
             "mobile" => 'nullable',
             "otp" => 'required',
+            'existingPaitent' => 'required|in:true,false'
         ]);
 
         if ($validator->fails()) {
@@ -109,60 +93,42 @@ class PaitentController extends Controller
             ], 400);
         }
 
-        $email = $request->email;
         $mobile = $request->mobile;
         $otp = $request->otp;
 
-        if ($email) {
-            // Check in paitent table
-            $paitent = DB::table('paitents')
-                ->where('paitent_email', $email)
-                ->where('email_otp', $otp)
-                ->first();
-
-            if ($paitent) {
-                return response()->json([
-                    'status' => true,
-                    'message' => 'Email OTP verified successfully.',
-                    'Existingpaitent' => true,
 
 
-                ]);
-            }
-
-            // Fallback: check in open_otp
-            $open = DB::table('open_otp')
-                ->where('email', $email)
-                ->where('otp', $otp)
-                ->first();
-
-            if ($open) {
-                return response()->json([
-                    'status' => true,
-                    'message' => 'Email OTP verified (open_otp).',
-                    'paitent' => false
-
-
-                ]);
-            }
-        }
-
-        if ($mobile) {
-            // Check in paitent table
+        if ($request->existingPaitent == true) {
             $paitent = DB::table('paitents')
                 ->where('paitent_mobile', $mobile)
                 ->where('mobile_otp', $otp)
                 ->first();
 
             if ($paitent) {
+                $paitents = \App\Models\Paitents::find($paitent->paitent_id); // ✅ Corrected
+
+                $token = JWTAuth::fromUser($paitents);
                 return response()->json([
                     'status' => true,
                     'message' => 'Mobile OTP verified successfully.',
-                    'paitent' => true
+                    'paitent' => array_merge(
+                        $paitents->only([
+                            'paitent_id',
+                            'paitent_name',
+                            'paitent_email',
+                            'paitent_mobile',
+                            'gender',
+                            'dob',
+                            'address',
+                            'inserted_date',
+                            'inserted_time',
+                        ]),
+                        ['token' => $token]
+                    ),
 
                 ]);
             }
-
+        } else {
             // Fallback: check in open_otp
             $open = DB::table('open_otp')
                 ->where('mobile', $mobile)
@@ -172,9 +138,7 @@ class PaitentController extends Controller
             if ($open) {
                 return response()->json([
                     'status' => true,
-                    'message' => 'Mobile OTP verified (open_otp).',
-                    'paitent' => false
-
+                    'message' => 'Mobile OTP verified.'
                 ]);
             }
         }
@@ -244,7 +208,7 @@ class PaitentController extends Controller
         ];
 
         try {
-            // Insert and retrieve the new patient
+
             $paitentId = DB::table('paitents')->insertGetId($commonData);
             // $paitent = DB::table('paitents')->where('paitent_id', $paitentId)->first();
 
@@ -289,6 +253,4 @@ class PaitentController extends Controller
             ], 500);
         }
     }
-
-
 }
