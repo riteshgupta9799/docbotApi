@@ -285,7 +285,7 @@ class CustomerController extends Controller
         if ($customer_unique_id) {
 
             $customer = Customer::where('customer_unique_id', $customer_unique_id)->first();
-            $customers = DB::table('customers')->where('customer_id', $customer->customer_id)
+            $customers = DB::table('customers')->where('customers.customer_id', $customer->customer_id)
                 ->leftJoin('machines','customers.machine_id','=','machines.machine_id')
                 ->select('customers.customer_unique_id', 'customers.customer_profile', 'customers.name', 'customers.username', 'customers.email', 'customers.mobile', 'machines.machine_unique_id')
                 ->orderBy('customers.customer_id', 'desc')
