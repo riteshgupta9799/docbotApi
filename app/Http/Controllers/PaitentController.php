@@ -47,7 +47,7 @@ class PaitentController extends Controller
         // dd($email);
         try {
             // Send OTP using Twilio WhatsApp Template
-            $twilio->sendOtpUsingTemplate($mobile, $otp);
+            $twilio->sendOtpUsingSmsTemplate($mobile, $otp);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
