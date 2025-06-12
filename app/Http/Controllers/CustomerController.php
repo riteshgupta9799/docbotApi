@@ -50,6 +50,13 @@ class CustomerController extends Controller
             ]);
         }
 
+         if($userNew->status=='Inactive'){
+             return response()->json([
+                'status' => false,
+                'message' => 'Your Account Has Been Deleted'
+            ]);
+        }
+
         if (!$user) {
 
             return response()->json([
@@ -119,12 +126,7 @@ class CustomerController extends Controller
         $userNew = User::where('email', $request->email)->first();
 
 
-        if($userNew->status=='Inactive'){
-             return response()->json([
-                'status' => false,
-                'message' => 'Your Account Has Been Deleted'
-            ]);
-        }
+
         if (!$user) {
 
             return response()->json([
