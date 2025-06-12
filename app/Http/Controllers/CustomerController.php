@@ -41,7 +41,12 @@ class CustomerController extends Controller
         $user = auth('customer_api')->user();
         $user = Customer::where('username', $validated['username'])->first();
         $userNew = Customer::where('username', $request->username)->first();
-
+    if($userNew->status=='Inactive'){
+             return response()->json([
+                'status' => false,
+                'message' => 'Your Account Has Been Deleted'
+            ]);
+        }
 
         if($userNew->token !== null){
             return response()->json([
@@ -50,12 +55,7 @@ class CustomerController extends Controller
             ]);
         }
 
-         if($userNew->status=='Inactive'){
-             return response()->json([
-                'status' => false,
-                'message' => 'Your Account Has Been Deleted'
-            ]);
-        }
+
 
         if (!$user) {
 
