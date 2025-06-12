@@ -30,7 +30,7 @@ class PaitentController extends Controller
 
         $validator = Validator::make($request->all(), [
 
-            "mobile" => 'required'
+            "mobile" => 'required|digits:10'
         ]);
 
         if ($validator->fails()) {
@@ -83,7 +83,7 @@ class PaitentController extends Controller
         $validator = Validator::make($request->all(), [
             "mobile" => 'nullable',
             "otp" => 'required',
-            'existingPaitent' => 'required|in:true,false'
+            'existingPaitent' => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -128,7 +128,8 @@ class PaitentController extends Controller
 
                 ]);
             }
-        } else {
+        }
+        if($request->existingPaitent == false){
             // Fallback: check in open_otp
             $open = DB::table('open_otp')
                 ->where('mobile', $mobile)
