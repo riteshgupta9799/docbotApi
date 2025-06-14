@@ -36,7 +36,14 @@ Route::prefix('admin')->middleware(['jwt.auth', 'admin'])->group(function () {
 
     // Deleteser
     Route::post('/delete_customer', [AdminController::class, 'delete_customer']);
+
+   // Update machine
+    Route::get('/machine_to_patient/{id}', [AdminController::class, 'machine_to_patient']);
+
+
 });
+
+
 
     // paitent Send Otp
     Route::post('/send_otp', [PaitentController::class, 'send_otp']);
@@ -46,6 +53,13 @@ Route::prefix('admin')->middleware(['jwt.auth', 'admin'])->group(function () {
 
        // register_paitent
     Route::post('/register_paitent', [PaitentController::class, 'register_paitent']);
+
+
+
+
+
+
+
 
        // get_verify_key
     Route::post('/get_verify_key', [CustomerController::class, 'get_verify_key']);

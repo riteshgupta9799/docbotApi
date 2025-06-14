@@ -161,6 +161,7 @@ class PaitentController extends Controller
             'message' => 'Invalid OTP or no matching record found.',
         ], 400);
     }
+
     public function register_paitent(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -170,6 +171,7 @@ class PaitentController extends Controller
             'gender' => 'required',
             'dob' => 'required|date',
             'address' => 'nullable',
+            'customer_unique_id' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -178,6 +180,17 @@ class PaitentController extends Controller
                 'message' => $validator->errors()->first(),
             ], 400);
         }
+
+
+        $customer = Customer::where('customer_unique_id', $request->customer_unique_id)->first();
+
+        if (!$customer) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Invalid or customer unique id.',
+            ], 401);
+        }
+
 
         // Set current time in Asia/Kolkata timezone
         $currentDateTime = Carbon::now('Asia/Kolkata');
@@ -218,6 +231,7 @@ class PaitentController extends Controller
             'address'        => $request->address,
             'inserted_date'  => $insertDate,
             'inserted_time'  => $insertTime,
+            'customer_id'    => $customer->customer_id,
         ];
 
         try {
@@ -303,4 +317,6 @@ class PaitentController extends Controller
 
                 ]);
     }
+
+
 }
