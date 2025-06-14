@@ -325,7 +325,7 @@ class PaitentController extends Controller
 
         try {
             $paitentId = DB::table('paitents')->insertGetId([
-                'patient_unique_id' => $patient_unique_id,
+                'paitent_unique_id' => $patient_unique_id,
                 'paitent_name'      => ucfirst(strtolower($request->paitent_name)),
                 'paitent_email'     => $request->paitent_email,
                 'paitent_mobile'    => $request->paitent_mobile,
@@ -347,7 +347,7 @@ class PaitentController extends Controller
                 'paitent' => array_merge(
                     $paitent->only([
                         'paitent_id',
-                        'patient_unique_id',
+                        'paitent_unique_id',
                         'paitent_name',
                         'paitent_email',
                         'paitent_mobile',
