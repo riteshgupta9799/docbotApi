@@ -118,7 +118,9 @@ class PaitentController extends Controller
         $mobile = $request->mobile;
         $otp = $request->otp;
 
-
+        $currentDateTime = Carbon::now('Asia/Kolkata');
+        $insertDate = $currentDateTime->toDateString();
+        $insertTime = $currentDateTime->toTimeString();
 
         if ($request->existingPaitent == true) {
             $paitent = DB::table('paitents')
@@ -131,9 +133,7 @@ class PaitentController extends Controller
                 $paitents = \App\Models\Paitents::find($paitent->paitent_id); // ✅ Corrected
 
                 $token = JWTAuth::fromUser($paitents);
-                $currentDateTime = Carbon::now('Asia/Kolkata');
-                $insertDate = $currentDateTime->toDateString();
-                $insertTime = $currentDateTime->toTimeString();
+                
 
                     $last_machine_patient = DB::table('last_machine_patient')->insertGetId([
                         'machine_id'        => $customer->machine_id,
@@ -175,6 +175,13 @@ class PaitentController extends Controller
                 ->first();
 
             if ($open) {
+                $last_machine_patient = DB::table('last_machine_patient')->insertGetId([
+                        'machine_id'        => $customer->machine_id,
+                        'inserted_date'     => $insertDate,
+                        'inserted_time'     => $insertTime,
+                        'patient_id'        => $paitent->paitent_id
+                    ]);
+
                 return response()->json([
                     'status' => true,
                     'message' => 'Mobile OTP verified.'
