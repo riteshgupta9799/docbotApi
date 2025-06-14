@@ -27,6 +27,7 @@ class CustomerController extends Controller
     public function login_customer(Request $request)
     {
 
+        
         $validated = $request->validate([
             'username' => 'required|exists:customers,username',
             'password' => 'required|string',
