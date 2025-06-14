@@ -17,7 +17,8 @@ class Paitents extends Authenticatable implements JWTSubject
     protected $fillable = [
         'paitent_name', 'gender', 'paitent_email', 'paitent_mobile', 'dob', 'address',
         'email_otp', 'mobile_otp','age',
-        'inserted_date', 'inserted_time','customer_id'
+        'inserted_date', 'inserted_time','customer_id',
+        'paitent_unique_id'
     ];
 
     public $timestamps = false;
