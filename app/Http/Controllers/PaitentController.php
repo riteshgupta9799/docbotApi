@@ -321,7 +321,7 @@ class PaitentController extends Controller
         $age = $dob->diffInYears(Carbon::now());
 
 
-        echo $patient_unique_id.$age;die;
+        // echo $patient_unique_id.$age;die;
 
         try {
             $paitentId = DB::table('paitents')->insertGetId([
