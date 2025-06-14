@@ -27,7 +27,7 @@ class CustomerController extends Controller
     public function login_customer(Request $request)
     {
 
-        
+
         $validated = $request->validate([
             'username' => 'required|exists:customers,username',
             'password' => 'required|string',
@@ -42,19 +42,20 @@ class CustomerController extends Controller
         $user = auth('customer_api')->user();
         $user = Customer::where('username', $validated['username'])->first();
         $userNew = Customer::where('username', $request->username)->first();
-    if($userNew->status=='Inactive'){
+
+        if($userNew->status=='Inactive'){
              return response()->json([
                 'status' => false,
                 'message' => 'Your Account Has Been Deleted'
             ]);
         }
 
-        if($userNew->token !== null){
-            return response()->json([
-                'status'=>false,
-                'message'=>'First logout in another devices'
-            ]);
-        }
+        // if($userNew->token !== null){
+        //     return response()->json([
+        //         'status'=>false,
+        //         'message'=>'First logout in another devices'
+        //     ]);
+        // }
 
 
 
