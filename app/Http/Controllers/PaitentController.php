@@ -95,8 +95,8 @@ class PaitentController extends Controller
         $validator = Validator::make($request->all(), [
             "mobile" => 'nullable',
             "otp" => 'required',
-            'existingPaitent' => 'required',
-            'customer_unique_id' => 'required'
+            "existingPaitent" => 'required',
+            "customer_unique_id" => 'required'
         ]);
 
         if ($validator->fails()) {
