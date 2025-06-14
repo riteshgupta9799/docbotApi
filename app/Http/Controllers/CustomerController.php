@@ -50,12 +50,12 @@ class CustomerController extends Controller
             ]);
         }
 
-        // if($userNew->token !== null){
-        //     return response()->json([
-        //         'status'=>false,
-        //         'message'=>'First logout in another devices'
-        //     ]);
-        // }
+        if($userNew->token !== null){
+            return response()->json([
+                'status'=>false,
+                'message'=>'First logout in another devices'
+            ]);
+        }
 
 
 
