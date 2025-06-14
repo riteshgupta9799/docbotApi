@@ -95,7 +95,8 @@ class PaitentController extends Controller
         $validator = Validator::make($request->all(), [
             "mobile" => 'nullable',
             "otp" => 'required',
-            'existingPaitent' => 'required'
+            'existingPaitent' => 'required',
+            'customer_unique_id' => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -104,6 +105,15 @@ class PaitentController extends Controller
                 'message' => $validator->errors()->first(),
             ], 400);
         }
+
+        $customer = Customer::where('customer_unique_id', $request->customer_unique_id)->first();
+        if (!$customer) {
+            return response()->json([
+                'status' => false,
+                'message' => 'No Customer Found!'
+            ]);
+        }
+
 
         $mobile = $request->mobile;
         $otp = $request->otp;
@@ -117,9 +127,22 @@ class PaitentController extends Controller
                 ->first();
 
             if ($paitent) {
+
                 $paitents = \App\Models\Paitents::find($paitent->paitent_id); // ✅ Corrected
 
                 $token = JWTAuth::fromUser($paitents);
+                $currentDateTime = Carbon::now('Asia/Kolkata');
+                $insertDate = $currentDateTime->toDateString();
+                $insertTime = $currentDateTime->toTimeString();
+
+                    $last_machine_patient = DB::table('last_machine_patient')->insertGetId([
+                        'machine_id'        => $customer->machine_id,
+                        'inserted_date'     => $insertDate,
+                        'inserted_time'     => $insertTime,
+                        'patient_id'        => $paitent->paitent_id
+                    ]);
+
+
                 return response()->json([
                     'status' => true,
                     'message' => 'Mobile OTP verified successfully.',
@@ -135,12 +158,15 @@ class PaitentController extends Controller
                             'inserted_date',
                             'inserted_time',
                         ]),
+
                         ['token' => $token]
+
                     ),
 
                 ]);
             }
         }
+
         if($request->existingPaitent == false){
             // Fallback: check in open_otp
             $open = DB::table('open_otp')
