@@ -162,7 +162,7 @@ class PaitentController extends Controller
         ], 400);
     }
 
-    public function register_paitent(Request $request)
+    public function register_paitent_(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'paitent_name' => 'required',
@@ -280,6 +280,94 @@ class PaitentController extends Controller
             ], 500);
         }
     }
+
+    public function register_paitent(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'paitent_name' => 'required',
+            'paitent_mobile' => 'required|unique:paitents,paitent_mobile',
+            'paitent_email' => 'required|email|unique:paitents,paitent_email',
+            'gender' => 'required',
+            'dob' => 'required|date',
+            'address' => 'nullable',
+            'customer_unique_id' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()->first(),
+            ], 400);
+        }
+
+        $customer = Customer::where('customer_unique_id', $request->customer_unique_id)->first();
+
+        if (!$customer) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Invalid or missing customer unique ID.',
+            ], 401);
+        }
+
+        $currentDateTime = Carbon::now('Asia/Kolkata');
+        $insertDate = $currentDateTime->toDateString();
+        $insertTime = $currentDateTime->toTimeString();
+
+        // Generate unique patient ID (e.g., 6-character random + timestamp)
+        $patient_unique_id = strtoupper(Str::random(6)) . '@' . now()->timestamp;
+
+        // Calculate age
+        $dob = Carbon::parse($request->dob);
+        $age = $dob->diffInYears(Carbon::now());
+
+        try {
+            $paitentId = DB::table('paitents')->insertGetId([
+                'patient_unique_id' => $patient_unique_id,
+                'paitent_name'      => ucfirst(strtolower($request->paitent_name)),
+                'paitent_email'     => $request->paitent_email,
+                'paitent_mobile'    => $request->paitent_mobile,
+                'gender'            => $request->gender,
+                'dob'               => $request->dob,
+                'address'           => $request->address,
+                'age'               => $age,
+                'inserted_date'     => $insertDate,
+                'inserted_time'     => $insertTime,
+                'customer_id'       => $customer->customer_id,
+            ]);
+
+            $paitent = \App\Models\Paitents::find($paitentId);
+            $token = JWTAuth::fromUser($paitent);
+
+            return response()->json([
+                'status'  => true,
+                'message' => 'Patient registered successfully',
+                'paitent' => array_merge(
+                    $paitent->only([
+                        'paitent_id',
+                        'patient_unique_id',
+                        'paitent_name',
+                        'paitent_email',
+                        'paitent_mobile',
+                        'gender',
+                        'dob',
+                        'age',
+                        'address',
+                        'inserted_date',
+                        'inserted_time',
+                        'customer_id'
+                    ]),
+                    ['token' => $token]
+                ),
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'An error occurred: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
 
     public function paitentData(Request $request){
 
