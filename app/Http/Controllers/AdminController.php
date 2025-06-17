@@ -259,6 +259,12 @@ class AdminController extends Controller
     }
 
 
+    public function machine_to_patient(Request $request){
+        
+    }
+
+
+
     // user Details for Admin
 
     public function get_all_customer(Request $request)
@@ -506,6 +512,8 @@ class AdminController extends Controller
             ], 500);
         }
     }
+
+
 
 
 }

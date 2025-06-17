@@ -407,7 +407,7 @@ class PaitentController extends Controller
 
     public function paitentData(Request $request){
 
-           if (!Auth::guard('paitent_api')->check()) {
+        if (!Auth::guard('paitent_api')->check()) {
             return response()->json([
                 'status' => false,
                 'message' => 'Unauthorized access.',
@@ -442,5 +442,32 @@ class PaitentController extends Controller
                 ]);
     }
 
+
+    public function last_report_machine(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            "customer_unique_id" => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()->first(),
+            ], 400);
+        }
+
+        $customer = Customer::where('customer_unique_id', $request->customer_unique_id)->first();
+        if (!$customer) {
+            return response()->json([
+                'status' => false,
+                'message' => 'No Customer Found!'
+            ]);
+        }
+
+
+
+        
+        
+    }
 
 }

@@ -355,6 +355,7 @@ class CustomerController extends Controller
             ], 400);
         }
            // Try to find a customer with the provided token
+
         $customer = Customer::where('token', $request->token)->first();
 
         if (!$customer) {
@@ -372,6 +373,8 @@ class CustomerController extends Controller
                 'message' => 'No Customer Found!'
             ]);
         }
+
+        
         $currentDateTime = Carbon::now('Asia/Kolkata');
         $insertDate = $currentDateTime->toDateString();
         $insertTime = $currentDateTime->toTimeString();

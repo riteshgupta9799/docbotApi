@@ -55,8 +55,8 @@ Route::prefix('admin')->middleware(['jwt.auth', 'admin'])->group(function () {
     Route::post('/register_paitent', [PaitentController::class, 'register_paitent']);
 
 
-
-
+   
+   Route::post('/last_report_machine', [PaitentController::class, 'last_report_machine']);
 
 
 
