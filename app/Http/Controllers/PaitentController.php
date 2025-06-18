@@ -454,7 +454,6 @@ class PaitentController extends Controller
     {
         $validator = Validator::make($request->all(), [
             "customer_unique_id" => 'required',
-            // "machine_id" => 'required',
             "patient_id" => 'required',
             "tests" => 'required|array|min:1',
             "tests.*.test_name" => 'required|string',
@@ -481,32 +480,36 @@ class PaitentController extends Controller
         $testQueue = new TestQueue();
         $testQueue->machine_id = $customer->machine_id;
         $testQueue->patient_id = $request->patient_id;
-        $testQueue->inserted_time = Carbon::now()->format('H:i:s');
-        $testQueue->inserted_date = Carbon::now()->format('Y-m-d');
+        $testQueue->inserted_time = now()->format('H:i:s');
+        $testQueue->inserted_date = now()->format('Y-m-d');
+
+        // Prevent Laravel from auto-adding timestamps
+        $testQueue->timestamps = false;
         $testQueue->save();
 
         $queue_id = $testQueue->id;
 
         // Insert each test into test_to_queue
-            foreach ($request->tests as $test) {
-                $testToQueue = new TestToQueue();
-                $testToQueue->queue_id = $queue_id;
-                $testToQueue->test_name = $test['test_name'];
-                $testToQueue->test_key = $test['test_key'];
-                $testToQueue->test_value = $test['test_value'];
-                $testToQueue->inserted_time = Carbon::now()->format('H:i:s');
-                $testToQueue->inserted_date = Carbon::now()->format('Y-m-d');
-                $testToQueue->save();
-            }
+        foreach ($request->tests as $test) {
+            $testToQueue = new TestToQueue();
+            $testToQueue->queue_id = $queue_id;
+            $testToQueue->test_name = $test['test_name'];
+            $testToQueue->test_key = $test['test_key'];
+            $testToQueue->test_value = $test['test_value'];
+            $testToQueue->inserted_time = now()->format('H:i:s');
+            $testToQueue->inserted_date = now()->format('Y-m-d');
 
-            return response()->json([
-                'status' => true,
-                'message' => 'Tests inserted successfully.',
-                'queue_id' => $queue_id,
-            ]);
+            $testToQueue->timestamps = false;
+            $testToQueue->save();
+        }
 
-
+        return response()->json([
+            'status' => true,
+            'message' => 'Tests inserted successfully.',
+            'queue_id' => $queue_id,
+        ]);
     }
+
 
 
 
