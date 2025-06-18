@@ -465,8 +465,12 @@ class PaitentController extends Controller
         }
 
 
+        return response()->json([
+                    'status' => true,
+                    'message' => 'Customer Found.',
+                    'data'=>$customer
+                ]);
 
-        
         
     }
 
