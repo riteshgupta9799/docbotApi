@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Paitents;
 use Laravel\Socialite\Facades\Socialite;
 
 use Carbon\Carbon;
@@ -454,12 +455,14 @@ class PaitentController extends Controller
     {
         $validator = Validator::make($request->all(), [
             "customer_unique_id" => 'required',
-            "patient_id" => 'required',
+            "paitent_unique_id" => 'required',
             "tests" => 'required|array|min:1',
             "tests.*.test_name" => 'required|string',
             "tests.*.test_key" => 'required|string',
             "tests.*.test_value" => 'required|string',
         ]);
+
+
 
         if ($validator->fails()) {
             return response()->json([
@@ -476,10 +479,19 @@ class PaitentController extends Controller
             ]);
         }
 
+
+        $patient = Paitents::where('paitent_unique_id', $request->paitent_unique_id)->first();
+        if (!$patient) {
+            return response()->json([
+                'status' => false,
+                'message' => 'No Patient Found!',
+            ]);
+        }
+
         // Insert into test_queue
         $testQueue = new TestQueue();
         $testQueue->machine_id = $customer->machine_id;
-        $testQueue->patient_id = $request->patient_id;
+        $testQueue->patient_id = $patient->paitent_id;
         $testQueue->inserted_time = now()->format('H:i:s');
         $testQueue->inserted_date = now()->format('Y-m-d');
 
