@@ -26,7 +26,7 @@ use App\Services\TwilioService;
 
 use App\Models\TestQueue;
 use App\Models\TestToQueue;
-
+use App\Models\PatientReport;
 
 
 class PaitentController extends Controller
@@ -449,8 +449,6 @@ class PaitentController extends Controller
     }
 
 
-
-
     public function add_test_queue(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -523,6 +521,38 @@ class PaitentController extends Controller
     }
 
 
+    public function last_report_machine_patient(Request $request)
+    {
+            $validator = Validator::make($request->all(), [
+                'customer_unique_id' => 'required'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => $validator->errors()->first()
+                ], 400);
+            }
+
+            // Fetch latest patient_id (replace logic based on your DB)
+            $latestPatientReport = PatientReport::where('patient_id', $request->customer_unique_id)
+                ->orderBy('inserted_date', 'desc')
+                ->orderBy('inserted_time', 'desc')
+                ->first();
+
+            if (!$latestPatientReport) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'No patient report found.'
+                ]);
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Latest patient report fetched.',
+                'data' => $latestPatientReport
+            ]);
+        }
 
 
 }
