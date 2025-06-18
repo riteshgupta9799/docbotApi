@@ -450,11 +450,11 @@ class PaitentController extends Controller
 
 
 
-    public function last_report_machine(Request $request)
+    public function add_test_queue(Request $request)
     {
         $validator = Validator::make($request->all(), [
             "customer_unique_id" => 'required',
-            "machine_id" => 'required',
+            // "machine_id" => 'required',
             "patient_id" => 'required',
             "tests" => 'required|array|min:1',
             "tests.*.test_name" => 'required|string',
@@ -479,7 +479,7 @@ class PaitentController extends Controller
 
         // Insert into test_queue
         $testQueue = new TestQueue();
-        $testQueue->machine_id = $request->machine_id;
+        $testQueue->machine_id = $customer->machine_id;
         $testQueue->patient_id = $request->patient_id;
         $testQueue->inserted_time = Carbon::now()->format('H:i:s');
         $testQueue->inserted_date = Carbon::now()->format('Y-m-d');
