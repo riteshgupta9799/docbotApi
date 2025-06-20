@@ -23,7 +23,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Test;
 use App\Models\MachinesTest;
-
+use App\Models\Patient;
 
 class CustomerController extends Controller
 {
@@ -625,6 +625,96 @@ class CustomerController extends Controller
                 'faq'=>$data
             ]);
     }
+
+
+    public function getTodaysReportsByMachine(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'customer_unique_id' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()->first(),
+            ]);
+        }
+
+        // Get customer and machine_id
+        $customer = Customer::where('customer_unique_id', $request->customer_unique_id)->first();
+        if (!$customer) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Invalid Customer ID.',
+            ]);
+        }
+
+        $machine_id = $customer->machine_id;
+        $today = date('Y-m-d');
+
+        // Get all today’s reports for this machine, grouped by patient_id
+        $groupedReports = DB::table('patient_reports')
+            ->select('patient_id')
+            ->where('machine_id', $machine_id)
+            ->where('inserted_date', $today)
+            ->groupBy('patient_id')
+            ->get();
+
+        $queueColors = [
+            1 => '0xFFFFC107', // amber
+            2 => '0xFF4CAF50', // green
+            3 => '0xFF2196F3', // blue
+            4 => '0xFFFF5722', // orange
+            5 => '0xFF9C27B0', // purple
+        ];
+
+        $finalData = [];
+
+        foreach ($groupedReports as $row) {
+            $patient = Patient::find($row->patient_id);
+
+            if (!$patient) continue;
+
+            // Get all today’s reports for this patient with test data
+            $reports = DB::table('patient_reports')
+                ->join('tests', 'patient_reports.test_id', '=', 'tests.id')
+                ->where('patient_reports.patient_id', $row->patient_id)
+                ->where('patient_reports.inserted_date', $today)
+                ->where('patient_reports.machine_id', $machine_id)
+                ->orderBy('patient_reports.que_id')
+                ->get()
+                ->map(function ($report) use ($machine_id, $queueColors) {
+                    return [
+                        'report_id'     => $report->report_id,
+                        'machine_id'    => $report->machine_id,
+                        'patient_id'    => $report->patient_id,
+                        'inserted_time' => $report->inserted_time,
+                        'inserted_date' => $report->inserted_date,
+                        'result_key'    => $report->result_key,
+                        'result_value'  => $report->result_value,
+                        'test_name'     => $report->test_name,
+                        'module_name'   => $report->module_name,
+                        'que_id'        => $report->que_id,
+                        'result_array'  => json_decode($report->result_array, true),
+                        'queue_color'   => $queueColors[$report->que_id] ?? '0xFF607D8B', // default: grey
+                        'this_machine'  => $report->machine_id == $machine_id ? 1 : 0
+                    ];
+                });
+
+            $finalData[] = [
+                'patient_id' => $patient->paitent_id,
+                'patient_name' => $patient->paitent_name,
+                'reports' => $reports
+            ];
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Today’s patient reports grouped by patient.',
+            'data' => $finalData
+        ]);
+    }
+
 
 
 }
