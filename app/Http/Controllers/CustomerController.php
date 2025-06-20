@@ -216,7 +216,7 @@ class CustomerController extends Controller
             ->where('tests.status', 1)
             ->select('tests.*', 'machines_tests.active_status', 'machines_tests.machine_id')
             ->get();
-            
+
         return response()->json([
             'status' => true,
             'message' => 'Active tests retrieved successfully.',
@@ -225,6 +225,57 @@ class CustomerController extends Controller
 
     }
 
+    public function save_deviceDetails(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            "customer_unique_id" => 'required|string',
+            "serial_number"=>'required|string'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()->first(),
+            ], 400);
+        }
+
+        $customer_unique_id = $request->customer_unique_id;
+
+        $customer = Customer::where('customer_unique_id', $customer_unique_id)->first();
+
+        if (!$customer) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Customer not found.',
+            ], 404);
+        }
+
+        $machine_id = $customer->machine_id;
+        $serial_number = $request->serial_number;
+
+        $machie= DB::table('machines')->where('machine_id',$machine_id)->first();    
+
+        if(!$machie){
+            return response()->json([
+                'status' => false,
+                'message' => 'Machine Not exists.',
+            ], 400);
+        }
+
+        DB::table('machines')
+            ->where('machine_id', $machine_id)
+            ->update([
+                'serial_number' => $serial_number
+            ]);
+
+        $machie= DB::table('machines')->where('machine_id',$machine_id)->first();    
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Machine Details Saved Successfully',
+            'data' => $machie
+        ]);
+    }
 
 
     public function login_user(Request $request)
