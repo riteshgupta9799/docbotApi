@@ -636,33 +636,36 @@ class PaitentController extends Controller
         }
 
         $machine_id = $customer->machine_id;
+        $colorCodes = ['0xFFFF5733', '0xFF33C1FF', '0xFF81C784'];
 
         
-        $reports = PatientReport::where('paitent_id', $patient->paitent_id)
-            ->orderByDesc('inserted_date')
-            ->orderByDesc('inserted_time')
+        $reports = DB::table('patient_reports')
+            ->join('tests', 'patient_reports.test_id', '=', 'tests.id')
+            ->where('patient_reports.patient_id', $patient->paitent_id)
+            ->orderByDesc('patient_reports.que_id')
             ->limit(3)
             ->get()
-            ->map(function ($report) use ($machine_id) {
+            ->map(function ($report, $index) use ($machine_id, $colorCodes) {
                 return [
-                    'report_id' => $report->report_id,
-                    'machine_id' => $report->machine_id,
-                    'patient_id' => $report->paitent_id,
+                    'report_id'     => $report->report_id,
+                    'machine_id'    => $report->machine_id,
+                    'patient_id'    => $report->patient_id,
                     'inserted_time' => $report->inserted_time,
                     'inserted_date' => $report->inserted_date,
-                    'result_key' => $report->result_key,
-                    'result_value' => $report->result_value,
-                    'test_name' => $report->test_name,
-                    'que_id' => $report->que_id,
-                    'result_array' => json_decode($report->result_array, true),
-                    'color' => '#00bcd4',
-                    'this_machine' => $report->machine_id == $machine_id ? 1 : 0
+                    'result_key'    => $report->result_key,
+                    'result_value'  => $report->result_value,
+                    'test_name'     => $report->test_name,
+                    'que_id'        => $report->que_id,
+                    'module_name'   => $report->module_name, // from tests table
+                    'result_array'  => json_decode($report->result_array, true),
+                    'color'         => $colorCodes[$index % count($colorCodes)],
+                    'this_machine'  => $report->machine_id == $machine_id ? 1 : 0
                 ];
             });
 
         return response()->json([
             'status' => true,
-            'message' => 'Patient details and reports fetched.',
+            'message' => 'Patient details and test reports fetched.',
             'data' => [
                 'patient' => $patient,
                 'reports' => $reports
