@@ -678,28 +678,29 @@ class CustomerController extends Controller
             // Get all today’s reports for this patient with test data
             $reports = DB::table('patient_reports')
                 ->join('tests', 'patient_reports.test_id', '=', 'tests.id')
-                ->where('patient_reports.patient_id', $row->patient_id)
-                ->where('patient_reports.inserted_date', $today)
-                ->where('patient_reports.machine_id', $machine_id)
-                ->orderBy('patient_reports.que_id')
-                ->get()
-                ->map(function ($report) use ($machine_id, $queueColors) {
-                    return [
-                        'report_id'     => $report->report_id,
-                        'machine_id'    => $report->machine_id,
-                        'patient_unique_id'    => $report->patient_unique_id,
-                        'inserted_time' => $report->inserted_time,
-                        'inserted_date' => $report->inserted_date,
-                        'result_key'    => $report->result_key,
-                        'result_value'  => $report->result_value,
-                        'test_name'     => $report->name,
-                        'module_name'   => $report->module_name,
-                        'que_id'        => $report->que_id,
-                        'result_array'  => json_decode($report->result_array, true),
-                        'queue_color'   => $queueColors[$report->que_id] ?? '0xFF607D8B', // default: grey
-                        'this_machine'  => $report->machine_id == $machine_id ? 1 : 0
-                    ];
-                });
+                ->join('paitents', 'patient_reports.patient_id', '=', 'paitents.paitent_id')
+                    ->where('patient_reports.patient_id', $row->patient_id)
+                    ->where('patient_reports.inserted_date', $today)
+                    ->where('patient_reports.machine_id', $machine_id)
+                    ->orderBy('patient_reports.que_id')
+                    ->get()
+                    ->map(function ($report) use ($machine_id, $queueColors) {
+                        return [
+                            'report_id'     => $report->report_id,
+                            'machine_id'    => $report->machine_id,
+                            'patient_unique_id'    => $report->patient_unique_id,
+                            'inserted_time' => $report->inserted_time,
+                            'inserted_date' => $report->inserted_date,
+                            'result_key'    => $report->result_key,
+                            'result_value'  => $report->result_value,
+                            'test_name'     => $report->name,
+                            'module_name'   => $report->module_name,
+                            'que_id'        => $report->que_id,
+                            'result_array'  => json_decode($report->result_array, true),
+                            'queue_color'   => $queueColors[$report->que_id] ?? '0xFF607D8B', // default: grey
+                            'this_machine'  => $report->machine_id == $machine_id ? 1 : 0
+                        ];
+                    });
 
             $finalData[] = [
                 'patient_id' => $patient->paitent_id,
