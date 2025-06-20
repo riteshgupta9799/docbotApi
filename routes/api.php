@@ -63,6 +63,7 @@ Route::prefix('admin')->middleware(['jwt.auth', 'admin'])->group(function () {
 
    Route::post('/add_test_queue', [PaitentController::class, 'add_test_queue']);
 
+   Route::post('/get_singleTestReport', [PaitentController::class, 'get_singleTestReport']);
 
        // get_verify_key
     Route::post('/get_verify_key', [CustomerController::class, 'get_verify_key']);
@@ -97,4 +98,4 @@ Route::prefix('admin')->middleware(['jwt.auth', 'admin'])->group(function () {
 
    Route::post('/getTodaysReportsByMachine', [CustomerController::class, 'getTodaysReportsByMachine']);
 
-   Route::post('/get_singleTestReport', [CustomerController::class, 'get_singleTestReport']);
+   
