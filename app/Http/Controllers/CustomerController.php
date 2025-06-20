@@ -688,7 +688,7 @@ class CustomerController extends Controller
                         return [
                             'report_id'     => $report->report_id,
                             'machine_id'    => $report->machine_id,
-                            'patient_unique_id'    => $report->patient_unique_id,
+                            'patient_unique_id'    => $report->paitent_unique_id,
                             'inserted_time' => $report->inserted_time,
                             'inserted_date' => $report->inserted_date,
                             'result_key'    => $report->result_key,
