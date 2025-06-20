@@ -648,13 +648,9 @@ class PaitentController extends Controller
             ->map(function ($report, $index) use ($machine_id, $colorCodes) {
                 return [
                     'report_id'     => $report->report_id,
-                    'machine_id'    => $report->machine_id,
-                    'patient_id'    => $report->patient_id,
                     'inserted_time' => $report->inserted_time,
                     'inserted_date' => $report->inserted_date,
-                    'result_key'    => $report->result_key,
-                    'result_value'  => $report->result_value,
-                    'test_name'     => $report->test_name,
+                    'test_name'     => $report->name,
                     'que_id'        => $report->que_id,
                     'module_name'   => $report->module_name, // from tests table
                     'result_array'  => json_decode($report->result_array, true),
