@@ -85,5 +85,6 @@ Route::prefix('admin')->middleware(['jwt.auth', 'admin'])->group(function () {
     Route::get('/getFaq', [CustomerController::class, 'getFaq']);
 
     // get about Data
-    Route::post('/machine_test_status', [CustomerController::class, 'machine_test_status']);
+   Route::post('/machine_test_status', [CustomerController::class, 'machine_test_status']);
 
+   Route::post('/getActive_allowedTest', [CustomerController::class, 'getActive_allowedTest']);

@@ -181,6 +181,50 @@ class CustomerController extends Controller
         ], 200);
     }   
 
+    public function getActive_allowedTest(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            "customer_unique_id" => 'required|string'   
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()->first(),
+            ], 400);
+        }
+
+        $customer_unique_id = $request->customer_unique_id;
+
+        $customer = Customer::where('customer_unique_id', $customer_unique_id)->first();
+
+        if (!$customer) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Customer not found.',
+            ], 404);
+        }
+
+        $machine_id = $customer->machine_id;
+
+        // $active_tests = Test::where('machine_id', $machine_id)->where('status', 'active')->get();
+
+        $active_tests = DB::table('machines_tests')
+            ->join('tests', 'machines_tests.test_id', '=', 'tests.id')
+            ->where('machines_tests.machine_id', $machine_id)
+            ->where('machines_tests.active_status', 1)
+            ->where('tests.status', 1)
+            ->select('tests.*', 'machines_tests.active_status', 'machines_tests.machine_id')
+            ->get();
+            
+        return response()->json([
+            'status' => true,
+            'message' => 'Active tests retrieved successfully.',
+            'active_tests' => $active_tests,
+        ], 200);
+
+    }
+
 
 
     public function login_user(Request $request)
