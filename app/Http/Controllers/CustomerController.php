@@ -21,6 +21,9 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Test;
+use App\Models\MachinesTest;
+
 
 class CustomerController extends Controller
 {
@@ -105,6 +108,77 @@ class CustomerController extends Controller
 
     // get machine veryify key
 
+
+    public function machine_test_status(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            "customer_unique_id" => 'required|string',
+            "bloodPressureModule" => 'required|string',
+            "cholesterolUricAcidModule" => 'required|string',
+            "glucometerModule" => 'required|string',
+            "hemoglobinModule" => 'required|string',
+            "pulseOximetryModule" => 'required|string',
+            "rdtModule" => 'required|string',
+            "ecgModule" => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()->first(),
+            ], 400);
+        }
+
+        $customer = Customer::where('customer_unique_id', $request->customer_unique_id)->first();
+
+        if (!$customer) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Invalid User.',
+            ], 401);
+        }
+
+        $machineId = $customer->machine_id;
+
+        $modules = [
+            'bloodPressureModule',
+            'cholesterolUricAcidModule',
+            'glucometerModule',
+            'hemoglobinModule',
+            'pulseOximetryModule',
+            'rdtModule',
+            'ecgModule'
+        ];
+
+        $updatedModules = [];
+
+        foreach ($modules as $moduleKey) {
+            $status = $request->$moduleKey;
+
+            if ($status === "1") {
+                $test = Test::where('module_name', $moduleKey)->first();
+
+                if ($test) {
+                    // Update the machines_tests entry
+                    MachinesTest::where('machine_id', $machineId)
+                        ->where('test_id', $test->id)
+                        ->update([
+                            'active_status' => 1,
+                            'inserted_time' => Carbon::now()->format('H:i:s'),
+                            'inserted_date' => Carbon::now()->format('Y-m-d'),
+                        ]);
+
+                    $updatedModules[] = $moduleKey;
+                }
+            }
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Test module statuses updated successfully.',
+            'updated_modules' => $updatedModules,
+        ], 200);
+    }   
 
 
 
@@ -271,9 +345,6 @@ class CustomerController extends Controller
     public function customer_data(Request $request)
     {
 
-
-
-
         $validator = Validator::make($request->all(), [
             "customer_unique_id" => 'required',
              'token' => 'required|string',
@@ -340,7 +411,7 @@ class CustomerController extends Controller
         }
     }
 
-      public function delete_account(Request $request) // customer side
+    public function delete_account(Request $request) // customer side
     {
 
         $validator = Validator::make($request->all(), [
@@ -416,4 +487,7 @@ class CustomerController extends Controller
                 'faq'=>$data
             ]);
     }
+
+
 }
+
