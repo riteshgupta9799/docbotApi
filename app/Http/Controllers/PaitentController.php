@@ -713,7 +713,7 @@ class PaitentController extends Controller
                 'patient_unique_id'=> $report->paitent_unique_id,
                 'patient_name'     => $report->paitent_name,
                 'machine_id'       => $report->machine_id,
-                'test_name'        => $report->name,
+                'test_name'        => $report->test_name,
                 'module_name'      => $report->module_name,
                 'result_key'       => $report->result_key,
                 'result_value'     => $report->result_value,
