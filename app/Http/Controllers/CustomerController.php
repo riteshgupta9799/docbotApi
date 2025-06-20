@@ -303,7 +303,7 @@ class CustomerController extends Controller
         $data = DB::table('customers')
             ->join('machines', 'machines.machine_id', '=', 'customers.machine_id')
             ->where('customers.customer_unique_id', $request->customer_unique_id)
-            ->select('customers.*', 'machines.machine_name', 'machines.machine_code', 'machines.machine_type', 'machines.serial_number', 'machines.created_at as machine_created_at') // add any specific machine fields you need
+            ->select('customers.*', 'machines.*')
             ->first();
 
         if (!$data) {
