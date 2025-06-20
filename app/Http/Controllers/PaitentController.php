@@ -671,4 +671,58 @@ class PaitentController extends Controller
     }
 
 
+    public function get_singleTestReport(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'report_id' => 'required|integer',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()->first(),
+            ]);
+        }
+
+        $report = DB::table('patient_reports')
+            ->join('tests', 'patient_reports.test_id', '=', 'tests.id')
+            ->join('paitents', 'patient_reports.patient_id', '=', 'paitents.paitent_id')
+            ->where('patient_reports.report_id', $request->report_id)
+            ->select(
+                'patient_reports.*',
+                'tests.name as test_name',
+                'tests.module_name',
+                'paitents.paitent_name',
+                'paitents.paitent_unique_id'
+            )
+            ->first();
+
+        if (!$report) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Report not found.',
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Report fetched successfully.',
+            'data' => [
+                'report_id'        => $report->report_id,
+                'patient_id'       => $report->patient_id,
+                'patient_unique_id'=> $report->paitent_unique_id,
+                'patient_name'     => $report->paitent_name,
+                'machine_id'       => $report->machine_id,
+                'test_name'        => $report->name,
+                'module_name'      => $report->module_name,
+                'result_key'       => $report->result_key,
+                'result_value'     => $report->result_value,
+                'result_array'     => json_decode($report->result_array, true),
+                'que_id'           => $report->que_id,
+                'inserted_date'    => $report->inserted_date,
+                'inserted_time'    => $report->inserted_time,
+            ]
+        ]);
+    }
+
 }

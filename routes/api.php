@@ -96,3 +96,5 @@ Route::prefix('admin')->middleware(['jwt.auth', 'admin'])->group(function () {
    Route::post('/getMachineDetails', [CustomerController::class, 'getMachineDetails']);
 
    Route::post('/getTodaysReportsByMachine', [CustomerController::class, 'getTodaysReportsByMachine']);
+
+   Route::post('/get_singleTestReport', [CustomerController::class, 'get_singleTestReport']);
