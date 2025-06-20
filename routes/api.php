@@ -90,3 +90,5 @@ Route::prefix('admin')->middleware(['jwt.auth', 'admin'])->group(function () {
    Route::post('/getActive_allowedTest', [CustomerController::class, 'getActive_allowedTest']);
 
    Route::post('/save_deviceDetails', [CustomerController::class, 'save_deviceDetails']);
+
+   Route::post('/getMachineDetails', [CustomerController::class, 'getMachineDetails']);

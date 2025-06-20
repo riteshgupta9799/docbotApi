@@ -277,6 +277,45 @@ class CustomerController extends Controller
         ]);
     }
 
+    public function getMachineDetails(Request $request)
+    {
+        $validated = $request->validate([
+                'customer_unique_id' => 'required|string|max:255',
+            ]);
+
+        if(!$validated){
+            return response()->json([
+                'status' => false,
+                'message' => 'Validation Failed',
+            ], 400);
+        }
+
+        $customer = DB::table('customers')->where('customer_unique_id',$request->customer_unique_id)->first();    
+
+        if(!$customer){
+            return response()->json([
+                'status' => false,
+                'message' => 'Customer Not found.',
+            ], 404);
+        }
+
+        $machine_id = $request->machine_id;
+
+        $machie= DB::table('machines')->where('machine_id',$machine_id)->first();    
+
+        if(!$machie){
+            return response()->json([
+                'status' => false,
+                'message' => 'Machine Not exists for this user.',
+            ], 400);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Machine Details',
+            'data' => $machie
+        ]);
+    }
 
     public function login_user(Request $request)
     {
