@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 Route::post('/login_customer', [CustomerController::class, 'login_customer']);
 Route::post('/login_user', [CustomerController::class, 'login_user']);
 
+
 Route::prefix('admin')->middleware(['jwt.auth', 'admin'])->group(function () {
     // Get all machines
     Route::get('/machines', [AdminController::class, 'getMachines']);
@@ -83,4 +84,6 @@ Route::prefix('admin')->middleware(['jwt.auth', 'admin'])->group(function () {
     // get faq Data
     Route::get('/getFaq', [CustomerController::class, 'getFaq']);
 
+    // get about Data
+    Route::post('/machine_test_status', [CustomerController::class, 'machine_test_status']);
 
