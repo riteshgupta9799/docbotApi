@@ -28,6 +28,7 @@ use App\Models\TestQueue;
 use App\Models\TestToQueue;
 use App\Models\PatientReport;
 
+use App\Models\Patient;
 
 class PaitentController extends Controller
 {
@@ -554,5 +555,43 @@ class PaitentController extends Controller
             ]);
         }
 
+
+    public function get_patient_details(Request $request)
+    {
+         $validator = Validator::make($request->all(), [
+            "paitent_unique_id" => 'required'
+        ]);
+
+        if ($validator->fails   ()) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => $validator->errors()->first(),
+                ]
+            );
+        }
+
+        $patient = Patient::where('paitent_unique_id', $request->paitent_unique_id)->first();
+
+        if (!$patient) {
+            return response()->json(
+
+                [
+                    'status' => false,
+                    'message' => 'Patient not found.',
+                ]
+            );
+        }
+
+        return response()->json(
+            [
+                'status' => true,
+                'message' => 'Patient details fetched.',
+                'data' => $patient,
+            ]
+        );
+    }
+
+    
 
 }

@@ -53,9 +53,9 @@ Route::prefix('admin')->middleware(['jwt.auth', 'admin'])->group(function () {
     Route::post('/verify_otp', [PaitentController::class, 'verify_otp']);
 
        // register_paitent
-    Route::post('/register_paitent', [PaitentController::class, 'register_paitent']);
+   Route::post('/register_paitent', [PaitentController::class, 'register_paitent']);
 
-
+   Route::post('/get_patient_details', [PaitentController::class, 'get_patient_details']);
    
    Route::post('/last_report_machine', [PaitentController::class, 'last_report_machine_patient']);
 
