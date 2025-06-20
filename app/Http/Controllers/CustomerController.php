@@ -163,6 +163,7 @@ class CustomerController extends Controller
                     MachinesTest::where('machine_id', $machineId)
                         ->where('test_id', $test->id)
                         ->update([
+                            'test_name'=>$test->name,
                             'active_status' => 1,
                             'inserted_time' => Carbon::now()->format('H:i:s'),
                             'inserted_date' => Carbon::now()->format('Y-m-d'),
