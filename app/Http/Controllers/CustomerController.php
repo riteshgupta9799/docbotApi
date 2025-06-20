@@ -299,21 +299,24 @@ class CustomerController extends Controller
             ], 404);
         }
 
-        $machine_id = $request->machine_id;
 
-        $machie= DB::table('machines')->where('machine_id',$machine_id)->first();    
+        $data = DB::table('customers')
+            ->join('machines', 'machines.machine_id', '=', 'customers.machine_id')
+            ->where('customers.customer_unique_id', $request->customer_unique_id)
+            ->select('customers.*', 'machines.machine_name', 'machines.machine_code', 'machines.machine_type', 'machines.serial_number', 'machines.created_at as machine_created_at') // add any specific machine fields you need
+            ->first();
 
-        if(!$machie){
+        if (!$data) {
             return response()->json([
                 'status' => false,
-                'message' => 'Machine Not exists for this user.',
-            ], 400);
+                'message' => 'Customer or machine not found.',
+            ], 404);
         }
 
         return response()->json([
             'status' => true,
             'message' => 'Machine Details',
-            'data' => $machie
+            'data' => $data
         ]);
     }
 
