@@ -29,6 +29,8 @@ use App\Models\TestToQueue;
 use App\Models\PatientReport;
 
 use App\Models\Patient;
+use App\Models\PatintReport;
+
 
 class PaitentController extends Controller
 {
@@ -558,7 +560,7 @@ class PaitentController extends Controller
 
     public function get_patient_details(Request $request)
     {
-         $validator = Validator::make($request->all(), [
+        $validator = Validator::make($request->all(), [
             "paitent_unique_id" => 'required'
         ]);
 
@@ -593,5 +595,81 @@ class PaitentController extends Controller
     }
 
     
+    public function get_patient_Testdetails(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            "paitent_unique_id" => 'required',
+            'customer_unique_id' => 'required'
+        ]);
+
+        if ($validator->fails   ()) {
+            return response()->json(
+                [
+                    'status' => false,
+                    'message' => $validator->errors()->first(),
+                ]
+            );
+        }
+
+        $patient = Patient::where('paitent_unique_id', $request->paitent_unique_id)->first();
+
+        if (!$patient) {
+            return response()->json(
+
+                [
+                    'status' => false,
+                    'message' => 'Patient not found.',
+                ]
+            );
+        }
+
+        $customer = Customer::where('customer_unique_id', $request->customer_unique_id)->first();
+
+        if (!$customer) {
+            return response()->json(
+
+                [
+                    'status' => false,
+                    'message' => 'Invalid Customer ID.',
+                ]
+            );
+        }
+
+        $machine_id = $customer->machine_id;
+
+        
+        $reports = PatientReport::where('paitent_id', $patient->paitent_id)
+            ->orderByDesc('inserted_date')
+            ->orderByDesc('inserted_time')
+            ->limit(3)
+            ->get()
+            ->map(function ($report) use ($machine_id) {
+                return [
+                    'report_id' => $report->report_id,
+                    'machine_id' => $report->machine_id,
+                    'patient_id' => $report->paitent_id,
+                    'inserted_time' => $report->inserted_time,
+                    'inserted_date' => $report->inserted_date,
+                    'result_key' => $report->result_key,
+                    'result_value' => $report->result_value,
+                    'test_name' => $report->test_name,
+                    'que_id' => $report->que_id,
+                    'result_array' => json_decode($report->result_array, true),
+                    'color' => '#00bcd4',
+                    'this_machine' => $report->machine_id == $machine_id ? 1 : 0
+                ];
+            });
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Patient details and reports fetched.',
+            'data' => [
+                'patient' => $patient,
+                'reports' => $reports
+            ]
+        ]);
+        
+    }
+
 
 }
