@@ -137,6 +137,8 @@ class PaitentController extends Controller
                 ->where('mobile_otp', $otp)
                 ->first();
 
+            print_r($paitent);die;
+
             if ($paitent) {
 
                 $paitents = \App\Models\Paitents::find($paitent->paitent_id); // ✅ Corrected
