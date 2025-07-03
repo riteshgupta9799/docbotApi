@@ -176,6 +176,7 @@ class PaitentController extends Controller
 
                 ]);
             }
+
         }
 
         if($request->existingPaitent == false){
