@@ -131,7 +131,7 @@ class PaitentController extends Controller
         $insertDate = $currentDateTime->toDateString();
         $insertTime = $currentDateTime->toTimeString();
 
-        echo $request->existingPaitent;    
+        echo $request->existingPaitent.'ok'; die;   
 
         if ($request->existingPaitent == true) {
             $paitent = DB::table('paitents')
