@@ -140,8 +140,8 @@ class PaitentController extends Controller
                 ->where('mobile_otp', $otp)
                 ->first();
 
-            echo $mobile.'  '.$otp;
-            print_r($paitent);die;
+            // echo $mobile.'  '.$otp;
+            // print_r($paitent);die;
 
             if ($paitent) {
 
@@ -184,10 +184,13 @@ class PaitentController extends Controller
         }
 
 
-        echo $request->existingPaitent.'okkk'; die;   
+          
 
         if($request->existingPaitent == false){
             // Fallback: check in open_otp
+
+
+            echo $request->existingPaitent.'okkk'; die; 
             $open = DB::table('open_otp')
                 ->where('mobile', $mobile)
                 ->where('otp', $otp)
