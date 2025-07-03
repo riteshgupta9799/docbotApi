@@ -131,12 +131,15 @@ class PaitentController extends Controller
         $insertDate = $currentDateTime->toDateString();
         $insertTime = $currentDateTime->toTimeString();
 
+        echo $request->existingPaitent;    
+
         if ($request->existingPaitent == true) {
             $paitent = DB::table('paitents')
                 ->where('paitent_mobile', $mobile)
                 ->where('mobile_otp', $otp)
                 ->first();
 
+            
             print_r($paitent);die;
 
             if ($paitent) {
