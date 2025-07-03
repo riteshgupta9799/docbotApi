@@ -138,6 +138,7 @@ class PaitentController extends Controller
             $paitent = DB::table('paitents')
                 ->where('paitent_mobile', $mobile)
                 ->where('mobile_otp', $otp)
+                
                 ->first();
 
             // echo $mobile.'  '.$otp;
@@ -192,6 +193,7 @@ class PaitentController extends Controller
             $open = DB::table('open_otp')
                 ->where('mobile', $mobile)
                 ->where('otp', $otp)
+                ->orderBy('open_otp_id', 'desc')
                 ->first();
 
             if ($open) {
