@@ -131,7 +131,7 @@ class PaitentController extends Controller
         $insertDate = $currentDateTime->toDateString();
         $insertTime = $currentDateTime->toTimeString();
 
-        echo $request->existingPaitent.'ok'; die;   
+        
 
         if ($request->existingPaitent == true) {
             $paitent = DB::table('paitents')
@@ -139,7 +139,7 @@ class PaitentController extends Controller
                 ->where('mobile_otp', $otp)
                 ->first();
 
-            
+            echo $request->existingPaitent.'ok'; die;   
             print_r($paitent);die;
 
             if ($paitent) {
@@ -181,6 +181,9 @@ class PaitentController extends Controller
             }
 
         }
+
+
+        echo $request->existingPaitent.'okkk'; die;   
 
         if($request->existingPaitent == false){
             // Fallback: check in open_otp
