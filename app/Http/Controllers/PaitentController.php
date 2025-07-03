@@ -134,12 +134,13 @@ class PaitentController extends Controller
         
 
         if ($request->existingPaitent == true) {
+
             $paitent = DB::table('paitents')
                 ->where('paitent_mobile', $mobile)
                 ->where('mobile_otp', $otp)
                 ->first();
 
-            echo $request->existingPaitent.'ok'; die;   
+            echo $mobile.'  '.$otp;
             print_r($paitent);die;
 
             if ($paitent) {
