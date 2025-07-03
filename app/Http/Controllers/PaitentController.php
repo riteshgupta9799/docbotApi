@@ -199,7 +199,7 @@ class PaitentController extends Controller
                         'machine_id'        => $customer->machine_id,
                         'inserted_date'     => $insertDate,
                         'inserted_time'     => $insertTime,
-                        'patient_id'        => $paitent->paitent_id
+                        // 'patient_id'        => $paitent->paitent_id
                     ]);
 
                 return response()->json([
