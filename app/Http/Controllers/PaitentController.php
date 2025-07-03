@@ -189,8 +189,6 @@ class PaitentController extends Controller
         if($request->existingPaitent == false){
             // Fallback: check in open_otp
 
-
-            echo $request->existingPaitent.'okkk44'; die; 
             $open = DB::table('open_otp')
                 ->where('mobile', $mobile)
                 ->where('otp', $otp)
