@@ -173,7 +173,7 @@ class PaitentController extends Controller
                             'address',
                             'inserted_date',
                             'inserted_time',
-                            'patient_unique_id',
+                            'paitent_unique_id'
                         ]),
 
                         ['token' => $token]
