@@ -229,7 +229,8 @@ class CustomerController extends Controller
     {
         $validator = Validator::make($request->all(), [
             "customer_unique_id" => 'required|string',
-            "serial_number"=>'required|string'
+            "serial_number"=>'required|string',
+            "firmware_version"=>'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -265,7 +266,8 @@ class CustomerController extends Controller
         DB::table('machines')
             ->where('machine_id', $machine_id)
             ->update([
-                'serial_number' => $serial_number
+                'serial_number' => $serial_number,
+                'firmware_version' => $request->firmware_version
             ]);
 
         $machie= DB::table('machines')->where('machine_id',$machine_id)->first();    
@@ -717,6 +719,7 @@ class CustomerController extends Controller
     }
 
 
+    
 
 }
 
