@@ -132,7 +132,7 @@ class CustomerController extends Controller
             $mobile = substr($mobile, -10);
 
             $customer = new Customer();
-            // $customer->customer_id = Str::uuid();
+            $customer->customer_unique_id = Str::uuid();
             $customer->token = null;
             $customer->name = trim($request->name);
             $customer->status = 'Active';
