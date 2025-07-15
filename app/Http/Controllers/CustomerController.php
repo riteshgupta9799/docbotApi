@@ -126,6 +126,17 @@ class CustomerController extends Controller
             ], 422);
         }
 
+        $mobile = preg_replace('/\D/', '', $request->mobile);
+        $mobile = substr($mobile, -10);
+
+        // Check if mobile already exists
+        if (Customer::where('mobile', $mobile)->exists()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Mobile number already exists',
+            ], 409);
+        }
+
         try {
             // Clean mobile number: keep last 10 digits
             $mobile = preg_replace('/\D/', '', $request->mobile);
