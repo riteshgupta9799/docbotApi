@@ -126,14 +126,32 @@ class CustomerController extends Controller
             ], 422);
         }
 
-        $mobile = preg_replace('/\D/', '', $request->mobile);
-        $mobile = substr($mobile, -10);
+        $rawMobile = preg_replace('/\D/', '', $request->mobile);
 
-        // Check if mobile already exists
+        // Ensure it's exactly 10 digits
+        if (strlen($rawMobile) != 10) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Mobile number must be exactly 10 digits'
+            ], 422);
+        }
+
+        // Add +91 prefix if missing
+        $mobile = '+91' . $rawMobile;
+
+        // Check duplicate mobile
         if (Customer::where('mobile', $mobile)->exists()) {
             return response()->json([
                 'status' => false,
-                'message' => 'Mobile number already exists',
+                'message' => 'Mobile number already exists'
+            ], 409);
+        }
+
+        // Check duplicate email manually (if provided)
+        if ($request->filled('email') && Customer::where('email', $request->email)->exists()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Email already exists'
             ], 409);
         }
 
