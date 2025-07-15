@@ -108,6 +108,58 @@ class CustomerController extends Controller
 
     // get machine veryify key
 
+    public function register_customer(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'username' => 'required|string|unique:customers,username',
+            'password' => 'required|string|min:6',
+            'email' => 'nullable|email|unique:customers,email',
+            'mobile' => 'required|string|min:10|max:15|unique:customers,mobile',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Validation error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            // Clean mobile number: keep last 10 digits
+            $mobile = preg_replace('/\D/', '', $request->mobile);
+            $mobile = substr($mobile, -10);
+
+            $customer = new Customer();
+            $customer->customer_id = Str::uuid();
+            $customer->token = null;
+            $customer->name = trim($request->name);
+            $customer->status = 'Active';
+            $customer->username = trim($request->username);
+            $customer->password = Hash::make($request->password);
+            $customer->email = trim($request->email);
+            $customer->mobile = $mobile;
+            $customer->machine_id = $request->machine_id ?? 1;
+            $customer->address = $request->address ?? null;
+            $customer->inserted_date = now()->toDateString();
+            $customer->inserted_time = now()->toTimeString();
+            $customer->save();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Customer registered successfully',
+                'customer' => $customer
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Registration failed',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 
     public function machine_test_status(Request $request)
     {
